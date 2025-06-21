@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registration</title>
+</head>
+<body>
+    <h1>Test Registration</h1>
+    <form id="testForm">
+        <div>
+            <label>Email: <input type="email" id="email" value="test2@example.com" required></label>
+        </div>
+        <div>
+            <label>Password: <input type="password" id="password" value="password123" required></label>
+        </div>
+        <div>
+            <label>Full Name: <input type="text" id="fullName" value="Test User 2" required></label>
+        </div>
+        <div>
+            <label>User Type: 
+                <select id="userType">
+                    <option value="jobseeker">Job Seeker</option>
+                    <option value="recruiter">Recruiter</option>
+                </select>
+            </label>
+        </div>
+        <div>
+            <label>Company Name: <input type="text" id="companyName" value="Test Company"></label>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                fullName: document.getElementById('fullName').value,
+                userType: document.getElementById('userType').value,
+                companyName: document.getElementById('companyName').value
+            };
+
+            console.log('Sending registration data:', formData);
+
+            try {
+                const response = await fetch('http://localhost:3002/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                console.log('Response:', result);
+
+                if (response.ok) {
+                    document.getElementById('result').innerHTML = `
+                        <h3 style="color: green;">Registration Successful!</h3>
+                        <p>Message: ${result.message}</p>
+                        <p>User ID: ${result.user?.id}</p>
+                        <p>Email: ${result.user?.email}</p>
+                        <p>User Type: ${result.user?.userType}</p>
+                    `;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <h3 style="color: red;">Registration Failed!</h3>
+                        <p>Error: ${result.error || JSON.stringify(result.errors)}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3 style="color: red;">Network Error!</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

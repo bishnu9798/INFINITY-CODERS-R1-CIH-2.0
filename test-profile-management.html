@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Enhanced Profile Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; max-height: 400px; overflow-y: auto; }
+        .profile-preview { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .profile-field { margin: 8px 0; }
+        .profile-field strong { color: #495057; }
+    </style>
+</head>
+<body>
+    <h1>Test Enhanced Profile Management for Job Seekers</h1>
+
+    <!-- Login as Job Seeker -->
+    <div class="test-section">
+        <h2>Step 1: Login as Job Seeker</h2>
+        <form id="jobseekerLoginForm">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="jobseekerEmail" value="testuser@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="jobseekerPassword" value="password123" required>
+            </div>
+            <button type="submit" id="jobseekerLoginBtn">Login as Job Seeker</button>
+        </form>
+        <div id="jobseekerLoginResult" class="result"></div>
+    </div>
+
+    <!-- Get Current Profile -->
+    <div class="test-section">
+        <h2>Step 2: Get Current Profile</h2>
+        <button onclick="getCurrentProfile()" id="getProfileBtn" disabled>Get Current Profile</button>
+        <div id="currentProfileResult" class="result"></div>
+        <div id="currentProfilePreview" class="profile-preview" style="display: none;"></div>
+    </div>
+
+    <!-- Update Profile -->
+    <div class="test-section">
+        <h2>Step 3: Update Profile</h2>
+        <form id="updateProfileForm">
+            <div class="form-group">
+                <label>Full Name:</label>
+                <input type="text" id="fullName" value="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email" value="testuser@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="tel" id="phone" value="+1 (555) 123-4567">
+            </div>
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="location" value="New York, NY">
+            </div>
+            <div class="form-group">
+                <label>Skills:</label>
+                <input type="text" id="skills" value="JavaScript, React, Node.js, Python, SQL">
+            </div>
+            <div class="form-group">
+                <label>Experience Level:</label>
+                <select id="experienceLevel">
+                    <option value="entry">Entry Level</option>
+                    <option value="1-2">1-2 years</option>
+                    <option value="2-4" selected>2-4 years</option>
+                    <option value="4-6">4-6 years</option>
+                    <option value="6+">6+ years</option>
+                    <option value="senior">Senior Level</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Expected Salary:</label>
+                <input type="text" id="expectedSalary" value="$60,000 - $80,000">
+            </div>
+            <div class="form-group">
+                <label>Availability:</label>
+                <select id="availability">
+                    <option value="immediately" selected>Available Immediately</option>
+                    <option value="2weeks">2 weeks notice</option>
+                    <option value="1month">1 month notice</option>
+                    <option value="2months">2 months notice</option>
+                    <option value="3months">3+ months</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>LinkedIn URL:</label>
+                <input type="url" id="linkedinUrl" value="https://linkedin.com/in/johndoe">
+            </div>
+            <div class="form-group">
+                <label>GitHub URL:</label>
+                <input type="url" id="githubUrl" value="https://github.com/johndoe">
+            </div>
+            <div class="form-group">
+                <label>Portfolio URL:</label>
+                <input type="url" id="portfolioUrl" value="https://johndoe.dev">
+            </div>
+            <div class="form-group">
+                <label>Bio:</label>
+                <textarea id="bio" rows="4">I am a passionate full-stack developer with 2+ years of experience in building web applications using modern technologies. I enjoy solving complex problems and creating user-friendly interfaces.</textarea>
+            </div>
+            <button type="submit" id="updateProfileBtn" disabled>Update Profile</button>
+        </form>
+        <div id="updateProfileResult" class="result"></div>
+    </div>
+
+    <!-- Test Profile Retrieval After Update -->
+    <div class="test-section">
+        <h2>Step 4: Verify Profile Update</h2>
+        <button onclick="getCurrentProfile()" id="verifyProfileBtn" disabled>Verify Updated Profile</button>
+        <div id="verifyProfileResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+        let jobseekerToken = '';
+        let currentProfile = null;
+
+        // Job Seeker Login
+        document.getElementById('jobseekerLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('jobseekerLoginBtn');
+            const result = document.getElementById('jobseekerLoginResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            
+            const formData = {
+                email: document.getElementById('jobseekerEmail').value,
+                password: document.getElementById('jobseekerPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    jobseekerToken = data.token;
+                    result.className = 'result success';
+                    result.textContent = `✅ Job Seeker Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
+                    document.getElementById('getProfileBtn').disabled = false;
+                    document.getElementById('updateProfileBtn').disabled = false;
+                    document.getElementById('verifyProfileBtn').disabled = false;
+                    
+                    // Auto-load current profile
+                    setTimeout(getCurrentProfile, 1000);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login Failed!\nError: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Login as Job Seeker';
+        });
+
+        // Get Current Profile
+        async function getCurrentProfile() {
+            if (!jobseekerToken) {
+                alert('Please login as job seeker first!');
+                return;
+            }
+
+            const result = document.getElementById('currentProfileResult');
+            const preview = document.getElementById('currentProfilePreview');
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${jobseekerToken}`
+                    }
+                });
+
+                const profile = await response.json();
+                
+                if (response.ok) {
+                    currentProfile = profile;
+                    result.className = 'result success';
+                    result.textContent = `✅ Profile Retrieved!\n${JSON.stringify(profile, null, 2)}`;
+                    
+                    // Show profile preview
+                    preview.style.display = 'block';
+                    preview.innerHTML = `
+                        <h4>Current Profile Preview:</h4>
+                        <div class="profile-field"><strong>Name:</strong> ${profile.full_name || 'Not set'}</div>
+                        <div class="profile-field"><strong>Email:</strong> ${profile.email || 'Not set'}</div>
+                        <div class="profile-field"><strong>Phone:</strong> ${profile.phone || 'Not set'}</div>
+                        <div class="profile-field"><strong>Location:</strong> ${profile.location || 'Not set'}</div>
+                        <div class="profile-field"><strong>Skills:</strong> ${profile.skills || 'Not set'}</div>
+                        <div class="profile-field"><strong>Experience:</strong> ${profile.experience_level || 'Not set'}</div>
+                        <div class="profile-field"><strong>Expected Salary:</strong> ${profile.expected_salary || 'Not set'}</div>
+                        <div class="profile-field"><strong>Availability:</strong> ${profile.availability || 'Not set'}</div>
+                        <div class="profile-field"><strong>LinkedIn:</strong> ${profile.linkedin_url || 'Not set'}</div>
+                        <div class="profile-field"><strong>GitHub:</strong> ${profile.github_url || 'Not set'}</div>
+                        <div class="profile-field"><strong>Portfolio:</strong> ${profile.portfolio_url || 'Not set'}</div>
+                        <div class="profile-field"><strong>Bio:</strong> ${profile.bio || 'Not set'}</div>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Error loading profile: ${profile.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        // Update Profile
+        document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!jobseekerToken) {
+                alert('Please login as job seeker first!');
+                return;
+            }
+
+            const btn = document.getElementById('updateProfileBtn');
+            const result = document.getElementById('updateProfileResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+            
+            const profileData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('location').value,
+                skills: document.getElementById('skills').value,
+                experienceLevel: document.getElementById('experienceLevel').value,
+                expectedSalary: document.getElementById('expectedSalary').value,
+                availability: document.getElementById('availability').value,
+                linkedinUrl: document.getElementById('linkedinUrl').value,
+                githubUrl: document.getElementById('githubUrl').value,
+                portfolioUrl: document.getElementById('portfolioUrl').value,
+                bio: document.getElementById('bio').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/users/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jobseekerToken}`
+                    },
+                    body: JSON.stringify(profileData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Profile Updated Successfully!\nMessage: ${data.message || 'Profile updated'}`;
+                    
+                    // Auto-refresh profile after update
+                    setTimeout(getCurrentProfile, 1000);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Profile Update Failed!\nError: ${data.error || JSON.stringify(data.errors, null, 2)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Update Profile';
+        });
+    </script>
+</body>
+</html>

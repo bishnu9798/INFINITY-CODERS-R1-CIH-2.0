@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend-Backend Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .status { padding: 15px; margin: 10px 0; border-radius: 5px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .loading { opacity: 0.6; pointer-events: none; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Frontend-Backend Connection Test</h1>
+        
+        <div class="status info">
+            <strong>Testing Connection Between:</strong><br>
+            Frontend: http://localhost:5173/<br>
+            Backend: http://localhost:3002/api
+        </div>
+
+        <div class="test-section">
+            <h2>1. Backend Health Check</h2>
+            <button onclick="testBackendHealth()">Test Backend</button>
+            <div id="backendResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Test Authentication</h2>
+            <button onclick="testLogin()">Test Login (Your Account)</button>
+            <button onclick="testRegister()">Test Registration</button>
+            <div id="authResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Test Jobs API</h2>
+            <button onclick="testJobs()">Get All Jobs</button>
+            <div id="jobsResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Frontend Status</h2>
+            <div class="status success">
+                ✅ Frontend is running on: <strong>http://localhost:5173/</strong>
+            </div>
+            <button onclick="openMainApp()">Open Main Job Portal</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showLoading(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status info">${message}</div>`;
+        }
+
+        async function testBackendHealth() {
+            showLoading('backendResult', '🔄 Testing backend connection...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('backendResult', `✅ Backend Connected Successfully!<br><strong>Message:</strong> ${data.message}`, 'success');
+                } else {
+                    showResult('backendResult', `❌ Backend Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('backendResult', `❌ Connection Failed: ${error.message}<br><strong>Make sure backend is running on port 3002</strong>`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            showLoading('authResult', '🔄 Testing login with your account...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'manishmodi0408@gmail.com',
+                        password: '987654'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('authResult', `✅ Login Successful!<br><strong>Welcome:</strong> ${data.user.full_name}<br><strong>Type:</strong> ${data.user.user_type}<br><strong>Token:</strong> Received`, 'success');
+                } else {
+                    showResult('authResult', `❌ Login Failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('authResult', `❌ Login Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testRegister() {
+            showLoading('authResult', '🔄 Testing registration...');
+            
+            const testUser = {
+                email: `test${Date.now()}@example.com`,
+                password: 'password123',
+                fullName: 'Test User',
+                userType: 'jobseeker'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testUser)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('authResult', `✅ Registration Successful!<br><strong>Email:</strong> ${testUser.email}<br><strong>User ID:</strong> ${data.user._id}<br><strong>Token:</strong> Received`, 'success');
+                } else {
+                    showResult('authResult', `❌ Registration Failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('authResult', `❌ Registration Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testJobs() {
+            showLoading('jobsResult', '🔄 Loading jobs...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/jobs`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    let jobsHtml = `✅ Jobs Loaded Successfully!<br><strong>Total Jobs:</strong> ${data.length}<br><br>`;
+                    
+                    if (data.length > 0) {
+                        jobsHtml += '<strong>Your Jobs:</strong><br>';
+                        data.forEach((job, index) => {
+                            jobsHtml += `${index + 1}. <strong>${job.title}</strong> at ${job.company}<br>`;
+                            jobsHtml += `   Location: ${job.location}<br>`;
+                            jobsHtml += `   Skills: ${job.skills}<br><br>`;
+                        });
+                    } else {
+                        jobsHtml += '<em>No jobs found</em>';
+                    }
+                    
+                    showResult('jobsResult', jobsHtml, 'success');
+                } else {
+                    showResult('jobsResult', `❌ Jobs Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('jobsResult', `❌ Jobs Error: ${error.message}`, 'error');
+            }
+        }
+
+        function openMainApp() {
+            window.open('http://localhost:5173/', '_blank');
+        }
+
+        // Auto-test on page load
+        window.onload = () => {
+            testBackendHealth();
+        };
+    </script>
+</body>
+</html>

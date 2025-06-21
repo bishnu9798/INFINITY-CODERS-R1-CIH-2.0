@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test Authentication System</h1>
+        <p>Testing backend API at: <strong>http://localhost:3002/api</strong></p>
+
+        <!-- Test Server Connection -->
+        <div class="section">
+            <h2>1. Test Server Connection</h2>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="connectionResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Register New User -->
+        <div class="section">
+            <h2>2. Register New User</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="regEmail" value="test@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="regPassword" value="123456" required>
+                </div>
+                <div class="form-group">
+                    <label>Full Name:</label>
+                    <input type="text" id="regFullName" value="Test User" required>
+                </div>
+                <div class="form-group">
+                    <label>User Type:</label>
+                    <select id="regUserType">
+                        <option value="jobseeker">Job Seeker</option>
+                        <option value="recruiter">Recruiter</option>
+                    </select>
+                </div>
+                <div class="form-group" id="companyGroup" style="display: none;">
+                    <label>Company Name:</label>
+                    <input type="text" id="regCompany" value="Test Company">
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <div id="registerResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Login User -->
+        <div class="section">
+            <h2>3. Login User</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="loginEmail" value="test@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="loginPassword" value="123456" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div id="loginResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test Existing Users -->
+        <div class="section">
+            <h2>4. Test Your Existing Users</h2>
+            <button onclick="testExistingUser('manishmodi0408@gmail.com', '987654')">Test Recruiter (Manish Modi)</button>
+            <button onclick="testExistingUser('manish1@gmail.com', '123456')">Test Job Seeker (Manish Kumar)</button>
+            <div id="existingUserResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+
+        // Test server connection
+        async function testConnection() {
+            const result = document.getElementById('connectionResult');
+            result.style.display = 'block';
+            result.textContent = 'Testing connection...';
+            result.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Server Connected! ${data.message}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Server Error: ${data.error || 'Unknown error'}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Connection Failed: ${error.message}`;
+            }
+        }
+
+        // Show/hide company field based on user type
+        document.getElementById('regUserType').addEventListener('change', function() {
+            const companyGroup = document.getElementById('companyGroup');
+            companyGroup.style.display = this.value === 'recruiter' ? 'block' : 'none';
+        });
+
+        // Register form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const result = document.getElementById('registerResult');
+            result.style.display = 'block';
+            result.textContent = 'Registering...';
+            result.className = 'result';
+
+            const userData = {
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                fullName: document.getElementById('regFullName').value,
+                userType: document.getElementById('regUserType').value
+            };
+
+            if (userData.userType === 'recruiter') {
+                userData.companyName = document.getElementById('regCompany').value;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Registration Successful! User ID: ${data.user.id || data.user._id}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Registration Failed: ${data.error || JSON.stringify(data.errors)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error: ${error.message}`;
+            }
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const result = document.getElementById('loginResult');
+            result.style.display = 'block';
+            result.textContent = 'Logging in...';
+            result.className = 'result';
+
+            const loginData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Login Successful! Welcome ${data.user.fullName || data.user.full_name}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login Failed: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error: ${error.message}`;
+            }
+        });
+
+        // Test existing user
+        async function testExistingUser(email, password) {
+            const result = document.getElementById('existingUserResult');
+            result.style.display = 'block';
+            result.textContent = `Testing login for ${email}...`;
+            result.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ ${email} Login Successful! Welcome ${data.user.fullName || data.user.full_name}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ ${email} Login Failed: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        // Test connection on page load
+        window.onload = () => {
+            testConnection();
+        };
+    </script>
+</body>
+</html>

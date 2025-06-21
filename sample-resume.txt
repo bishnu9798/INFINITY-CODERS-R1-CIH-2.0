@@ -1,0 +1,21 @@
+JOHN DOE
+Software Developer
+
+Email: john.doe@example.com
+Phone: (555) 123-4567
+Location: New York, NY
+
+EXPERIENCE:
+- Frontend Developer at Tech Company (2020-2023)
+- Junior Developer at Startup Inc (2018-2020)
+
+SKILLS:
+- JavaScript, React, Node.js
+- HTML, CSS, Python
+- Git, Docker, AWS
+
+EDUCATION:
+- Bachelor of Computer Science
+- University of Technology (2014-2018)
+
+This is a sample resume file for testing the upload functionality.

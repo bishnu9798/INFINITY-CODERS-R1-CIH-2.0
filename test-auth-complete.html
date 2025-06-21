@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Auth Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Complete Authentication Test</h1>
+
+    <!-- Registration Test -->
+    <div class="test-section">
+        <h2>Test Registration</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="regEmail" value="newuser@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password (min 6 chars):</label>
+                <input type="password" id="regPassword" value="password123" required>
+            </div>
+            <div class="form-group">
+                <label>Full Name:</label>
+                <input type="text" id="regFullName" value="New Test User" required>
+            </div>
+            <div class="form-group">
+                <label>User Type:</label>
+                <select id="regUserType">
+                    <option value="jobseeker">Job Seeker</option>
+                    <option value="recruiter">Recruiter</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Company Name (for recruiters):</label>
+                <input type="text" id="regCompanyName" value="Test Company">
+            </div>
+            <button type="submit" id="regBtn">Register</button>
+        </form>
+        <div id="regResult" class="result"></div>
+    </div>
+
+    <!-- Login Test -->
+    <div class="test-section">
+        <h2>Test Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" value="testuser@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="password123" required>
+            </div>
+            <button type="submit" id="loginBtn">Login</button>
+        </form>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <!-- Test Invalid Cases -->
+    <div class="test-section">
+        <h2>Test Invalid Cases</h2>
+        <button onclick="testShortPassword()">Test Short Password</button>
+        <button onclick="testInvalidEmail()">Test Invalid Email</button>
+        <button onclick="testWrongCredentials()">Test Wrong Credentials</button>
+        <div id="invalidResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+
+        // Registration test
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('regBtn');
+            const result = document.getElementById('regResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+            
+            const formData = {
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                fullName: document.getElementById('regFullName').value,
+                userType: document.getElementById('regUserType').value,
+                companyName: document.getElementById('regCompanyName').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Registration Successful!\nMessage: ${data.message}\nUser: ${JSON.stringify(data.user, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Registration Failed!\nError: ${data.error || JSON.stringify(data.errors, null, 2)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Register';
+        });
+
+        // Login test
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const result = document.getElementById('loginResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            
+            const formData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Login Successful!\nMessage: ${data.message}\nUser: ${JSON.stringify(data.user, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login Failed!\nError: ${data.error || JSON.stringify(data.errors, null, 2)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Login';
+        });
+
+        // Test invalid cases
+        async function testShortPassword() {
+            const result = document.getElementById('invalidResult');
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: '123',
+                        fullName: 'Test User',
+                        userType: 'jobseeker'
+                    })
+                });
+                const data = await response.json();
+                result.className = 'result error';
+                result.textContent = `Short Password Test:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testInvalidEmail() {
+            const result = document.getElementById('invalidResult');
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'invalid-email',
+                        password: 'password123',
+                        fullName: 'Test User',
+                        userType: 'jobseeker'
+                    })
+                });
+                const data = await response.json();
+                result.className = 'result error';
+                result.textContent = `Invalid Email Test:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testWrongCredentials() {
+            const result = document.getElementById('invalidResult');
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'nonexistent@example.com',
+                        password: 'wrongpassword'
+                    })
+                });
+                const data = await response.json();
+                result.className = 'result error';
+                result.textContent = `Wrong Credentials Test:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

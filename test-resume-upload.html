@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Resume Upload</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Test Resume Upload & Job Application</h1>
+
+    <!-- Login First -->
+    <div class="test-section">
+        <h2>Step 1: Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" value="testuser@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="password123" required>
+            </div>
+            <button type="submit" id="loginBtn">Login</button>
+        </form>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <!-- Test Resume Upload -->
+    <div class="test-section">
+        <h2>Step 2: Test Job Application with Resume</h2>
+        <form id="applicationForm">
+            <div class="form-group">
+                <label>Job ID:</label>
+                <input type="number" id="jobId" value="1" required>
+            </div>
+            <div class="form-group">
+                <label>Resume File (PDF or DOCX):</label>
+                <input type="file" id="resumeFile" accept=".pdf,.docx" required>
+            </div>
+            <div class="form-group">
+                <label>Cover Letter (Optional):</label>
+                <textarea id="coverLetter" rows="3" placeholder="Write your cover letter here..."></textarea>
+            </div>
+            <button type="submit" id="applyBtn" disabled>Apply for Job</button>
+        </form>
+        <div id="applicationResult" class="result"></div>
+    </div>
+
+    <!-- Get Jobs -->
+    <div class="test-section">
+        <h2>Available Jobs</h2>
+        <button onclick="getJobs()">Load Jobs</button>
+        <div id="jobsResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+        let authToken = '';
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const result = document.getElementById('loginResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            
+            const formData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    result.className = 'result success';
+                    result.textContent = `✅ Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
+                    document.getElementById('applyBtn').disabled = false;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login Failed!\nError: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Login';
+        });
+
+        // Job Application
+        document.getElementById('applicationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!authToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            const btn = document.getElementById('applyBtn');
+            const result = document.getElementById('applicationResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Applying...';
+            
+            const formData = new FormData();
+            formData.append('jobId', document.getElementById('jobId').value);
+            formData.append('resume', document.getElementById('resumeFile').files[0]);
+            formData.append('coverLetter', document.getElementById('coverLetter').value);
+
+            try {
+                const response = await fetch(`${API_BASE}/applications`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Application Successful!\nMessage: ${data.message}\nApplication ID: ${data.applicationId}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Application Failed!\nError: ${data.error || JSON.stringify(data.errors, null, 2)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Apply for Job';
+        });
+
+        // Get Jobs
+        async function getJobs() {
+            const result = document.getElementById('jobsResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/jobs`);
+                const jobs = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `Available Jobs:\n${JSON.stringify(jobs, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `Error loading jobs: ${jobs.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `Network Error: ${error.message}`;
+            }
+        }
+
+        // File validation
+        document.getElementById('resumeFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                const isValid = validTypes.includes(file.type) || file.name.endsWith('.pdf') || file.name.endsWith('.docx');
+                
+                if (!isValid) {
+                    alert('Please select a PDF or DOCX file');
+                    e.target.value = '';
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size must be less than 10MB');
+                    e.target.value = '';
+                    return;
+                }
+                
+                console.log('File selected:', file.name, file.size, file.type);
+            }
+        });
+    </script>
+</body>
+</html>

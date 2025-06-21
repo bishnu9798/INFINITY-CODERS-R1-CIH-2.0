@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Resume Tab</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Resume Tab Test</h1>
+    
+    <div class="test-section">
+        <h2>Instructions</h2>
+        <p>1. Open the main application: <a href="http://localhost:5175/" target="_blank">http://localhost:5175/</a></p>
+        <p>2. Login as a job seeker (testuser@example.com / password123)</p>
+        <p>3. Click on the "Resume" tab</p>
+        <p>4. You should see the resume upload interface</p>
+        <p>5. Try uploading a PDF or DOCX file</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Quick Test</h2>
+        <p>Click the button below to test if the frontend is responding:</p>
+        <button onclick="testFrontend()">Test Frontend</button>
+        <button onclick="testBackend()">Test Backend</button>
+        <div id="testResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Expected Resume Tab Content</h2>
+        <p>The Resume tab should show:</p>
+        <ul>
+            <li>✅ "Upload Your Resume" heading</li>
+            <li>✅ File upload area with drag & drop</li>
+            <li>✅ "Upload a file" button</li>
+            <li>✅ "PDF or DOCX up to 10MB" text</li>
+            <li>✅ Green confirmation when file is selected</li>
+        </ul>
+    </div>
+
+    <script>
+        async function testFrontend() {
+            const result = document.getElementById('testResult');
+            try {
+                const response = await fetch('http://localhost:5175/');
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = '✅ Frontend is running correctly!';
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ Frontend returned error: ' + response.status;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = '❌ Frontend connection failed: ' + error.message;
+            }
+        }
+
+        async function testBackend() {
+            const result = document.getElementById('testResult');
+            try {
+                const response = await fetch('http://localhost:3002/api/health');
+                const data = await response.json();
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = '✅ Backend is running correctly!\n' + JSON.stringify(data, null, 2);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ Backend returned error: ' + response.status;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = '❌ Backend connection failed: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

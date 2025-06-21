@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Enhanced Job Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; max-height: 400px; overflow-y: auto; }
+        .job-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; background: #f9f9f9; }
+        .job-actions { margin-top: 10px; }
+        .job-actions button { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Test Enhanced Job Management Features</h1>
+
+    <!-- Login as Recruiter -->
+    <div class="test-section">
+        <h2>Step 1: Login as Recruiter</h2>
+        <form id="recruiterLoginForm">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="recruiterEmail" value="manish2@gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="recruiterPassword" value="987654" required>
+            </div>
+            <button type="submit" id="recruiterLoginBtn">Login as Recruiter</button>
+        </form>
+        <div id="recruiterLoginResult" class="result"></div>
+    </div>
+
+    <!-- Create New Job -->
+    <div class="test-section">
+        <h2>Step 2: Create New Job</h2>
+        <form id="createJobForm">
+            <div class="form-group">
+                <label>Job Title:</label>
+                <input type="text" id="jobTitle" value="Senior React Developer" required>
+            </div>
+            <div class="form-group">
+                <label>Company:</label>
+                <input type="text" id="jobCompany" value="Tech Solutions Inc" required>
+            </div>
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="jobLocation" value="New York, NY" required>
+            </div>
+            <div class="form-group">
+                <label>Experience:</label>
+                <select id="jobExperience" required>
+                    <option value="2-4 years">2-4 years</option>
+                    <option value="4+ years">4+ years</option>
+                    <option value="1-2 years">1-2 years</option>
+                    <option value="Entry Level">Entry Level</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Skills (comma separated):</label>
+                <input type="text" id="jobSkills" value="React, JavaScript, Node.js, MongoDB" required>
+            </div>
+            <div class="form-group">
+                <label>Salary Range:</label>
+                <input type="text" id="jobSalary" value="$80,000 - $120,000">
+            </div>
+            <div class="form-group">
+                <label>Job Type:</label>
+                <select id="jobType">
+                    <option value="full-time">Full Time</option>
+                    <option value="part-time">Part Time</option>
+                    <option value="contract">Contract</option>
+                    <option value="internship">Internship</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea id="jobDescription" rows="4" required>We are looking for a Senior React Developer to join our dynamic team. You will be responsible for developing user interface components and implementing them following well-known React.js workflows.</textarea>
+            </div>
+            <button type="submit" id="createJobBtn" disabled>Create Job</button>
+        </form>
+        <div id="createJobResult" class="result"></div>
+    </div>
+
+    <!-- Get Recruiter Jobs -->
+    <div class="test-section">
+        <h2>Step 3: View Your Jobs</h2>
+        <button onclick="getRecruiterJobs()" id="getJobsBtn" disabled>Get My Jobs</button>
+        <div id="jobsResult" class="result"></div>
+        <div id="jobsList"></div>
+    </div>
+
+    <!-- Test Edit/Delete -->
+    <div class="test-section">
+        <h2>Step 4: Test Edit/Delete</h2>
+        <p>Use the Edit and Delete buttons on the jobs above to test the functionality.</p>
+        <div id="editDeleteResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+        let recruiterToken = '';
+        let currentJobs = [];
+
+        // Recruiter Login
+        document.getElementById('recruiterLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('recruiterLoginBtn');
+            const result = document.getElementById('recruiterLoginResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            
+            const formData = {
+                email: document.getElementById('recruiterEmail').value,
+                password: document.getElementById('recruiterPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    recruiterToken = data.token;
+                    result.className = 'result success';
+                    result.textContent = `✅ Recruiter Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
+                    document.getElementById('createJobBtn').disabled = false;
+                    document.getElementById('getJobsBtn').disabled = false;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login Failed!\nError: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Login as Recruiter';
+        });
+
+        // Create Job
+        document.getElementById('createJobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!recruiterToken) {
+                alert('Please login as recruiter first!');
+                return;
+            }
+
+            const btn = document.getElementById('createJobBtn');
+            const result = document.getElementById('createJobResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+            
+            const jobData = {
+                title: document.getElementById('jobTitle').value,
+                company: document.getElementById('jobCompany').value,
+                location: document.getElementById('jobLocation').value,
+                experience: document.getElementById('jobExperience').value,
+                skills: document.getElementById('jobSkills').value,
+                salaryRange: document.getElementById('jobSalary').value,
+                jobType: document.getElementById('jobType').value,
+                description: document.getElementById('jobDescription').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${recruiterToken}`
+                    },
+                    body: JSON.stringify(jobData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Job Created Successfully!\nJob ID: ${data.jobId}`;
+                    // Auto-refresh jobs list
+                    setTimeout(getRecruiterJobs, 1000);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Job Creation Failed!\nError: ${data.error || JSON.stringify(data.errors, null, 2)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Create Job';
+        });
+
+        // Get Recruiter Jobs
+        async function getRecruiterJobs() {
+            if (!recruiterToken) {
+                alert('Please login as recruiter first!');
+                return;
+            }
+
+            const result = document.getElementById('jobsResult');
+            const jobsList = document.getElementById('jobsList');
+            
+            try {
+                const response = await fetch(`${API_BASE}/jobs/recruiter/my-jobs`, {
+                    headers: {
+                        'Authorization': `Bearer ${recruiterToken}`
+                    }
+                });
+
+                const jobs = await response.json();
+                
+                if (response.ok) {
+                    currentJobs = jobs;
+                    result.className = 'result success';
+                    result.textContent = `✅ Jobs Retrieved!\nCount: ${jobs.length}`;
+                    
+                    // Display jobs with edit/delete buttons
+                    jobsList.innerHTML = jobs.map(job => `
+                        <div class="job-card">
+                            <h3>${job.title}</h3>
+                            <p><strong>Company:</strong> ${job.company}</p>
+                            <p><strong>Location:</strong> ${job.location}</p>
+                            <p><strong>Experience:</strong> ${job.experience}</p>
+                            <p><strong>Skills:</strong> ${Array.isArray(job.skills) ? job.skills.join(', ') : job.skills}</p>
+                            <p><strong>Salary:</strong> ${job.salary_range || 'Not specified'}</p>
+                            <p><strong>Type:</strong> ${job.job_type || 'Full Time'}</p>
+                            <p><strong>Applications:</strong> ${job.application_count || 0}</p>
+                            <p><strong>Description:</strong> ${job.description}</p>
+                            <div class="job-actions">
+                                <button onclick="editJob(${job.id})" style="background-color: #007bff;">Edit Job</button>
+                                <button onclick="deleteJob(${job.id}, '${job.title}')" style="background-color: #dc3545;">Delete Job</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Error loading jobs: ${jobs.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        // Edit Job (simplified - just shows current data)
+        async function editJob(jobId) {
+            const job = currentJobs.find(j => j.id === jobId);
+            if (!job) return;
+
+            const newTitle = prompt('Edit Job Title:', job.title);
+            if (!newTitle) return;
+
+            const newCompany = prompt('Edit Company:', job.company);
+            if (!newCompany) return;
+
+            const jobData = {
+                title: newTitle,
+                company: newCompany,
+                location: job.location,
+                experience: job.experience,
+                skills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills,
+                description: job.description,
+                salaryRange: job.salary_range || '',
+                jobType: job.job_type || 'full-time'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/jobs/${jobId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${recruiterToken}`
+                    },
+                    body: JSON.stringify(jobData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Job updated successfully!');
+                    getRecruiterJobs(); // Refresh list
+                } else {
+                    alert(`Error updating job: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Network error: ${error.message}`);
+            }
+        }
+
+        // Delete Job
+        async function deleteJob(jobId, jobTitle) {
+            if (!confirm(`Are you sure you want to delete "${jobTitle}"?`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/jobs/${jobId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${recruiterToken}`
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Job deleted successfully!');
+                    getRecruiterJobs(); // Refresh list
+                } else {
+                    alert(`Error deleting job: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Network error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

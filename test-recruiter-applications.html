@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Recruiter Applications</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; max-height: 400px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Test Recruiter Applications Flow</h1>
+
+    <!-- Step 1: Login as Job Seeker -->
+    <div class="test-section">
+        <h2>Step 1: Login as Job Seeker</h2>
+        <form id="jobseekerLoginForm">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="jobseekerEmail" value="testuser@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="jobseekerPassword" value="password123" required>
+            </div>
+            <button type="submit" id="jobseekerLoginBtn">Login as Job Seeker</button>
+        </form>
+        <div id="jobseekerLoginResult" class="result"></div>
+    </div>
+
+    <!-- Step 2: Apply for Job -->
+    <div class="test-section">
+        <h2>Step 2: Apply for Job (as Job Seeker)</h2>
+        <form id="applicationForm">
+            <div class="form-group">
+                <label>Job ID:</label>
+                <input type="number" id="jobId" value="1" required>
+            </div>
+            <div class="form-group">
+                <label>Resume File:</label>
+                <input type="file" id="resumeFile" accept=".pdf,.docx" required>
+            </div>
+            <button type="submit" id="applyBtn" disabled>Apply for Job</button>
+        </form>
+        <div id="applicationResult" class="result"></div>
+    </div>
+
+    <!-- Step 3: Login as Recruiter -->
+    <div class="test-section">
+        <h2>Step 3: Login as Recruiter</h2>
+        <form id="recruiterLoginForm">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="recruiterEmail" value="recruiter@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="recruiterPassword" value="password123" required>
+            </div>
+            <button type="submit" id="recruiterLoginBtn">Login as Recruiter</button>
+        </form>
+        <div id="recruiterLoginResult" class="result"></div>
+    </div>
+
+    <!-- Step 4: Check Recruiter Applications -->
+    <div class="test-section">
+        <h2>Step 4: Check Recruiter Applications</h2>
+        <button onclick="getRecruiterApplications()" id="getApplicationsBtn" disabled>Get Applications</button>
+        <div id="applicationsResult" class="result"></div>
+    </div>
+
+    <!-- Available Jobs -->
+    <div class="test-section">
+        <h2>Available Jobs</h2>
+        <button onclick="getJobs()">Load Jobs</button>
+        <div id="jobsResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+        let jobseekerToken = '';
+        let recruiterToken = '';
+
+        // Job Seeker Login
+        document.getElementById('jobseekerLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('jobseekerLoginBtn');
+            const result = document.getElementById('jobseekerLoginResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            
+            const formData = {
+                email: document.getElementById('jobseekerEmail').value,
+                password: document.getElementById('jobseekerPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    jobseekerToken = data.token;
+                    result.className = 'result success';
+                    result.textContent = `✅ Job Seeker Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
+                    document.getElementById('applyBtn').disabled = false;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login Failed!\nError: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Login as Job Seeker';
+        });
+
+        // Job Application
+        document.getElementById('applicationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!jobseekerToken) {
+                alert('Please login as job seeker first!');
+                return;
+            }
+
+            const btn = document.getElementById('applyBtn');
+            const result = document.getElementById('applicationResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Applying...';
+            
+            const formData = new FormData();
+            formData.append('jobId', document.getElementById('jobId').value);
+            formData.append('resume', document.getElementById('resumeFile').files[0]);
+
+            try {
+                const response = await fetch(`${API_BASE}/applications`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jobseekerToken}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Application Successful!\nMessage: ${data.message}\nApplication ID: ${data.applicationId}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Application Failed!\nError: ${data.error || JSON.stringify(data.errors, null, 2)}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Apply for Job';
+        });
+
+        // Recruiter Login
+        document.getElementById('recruiterLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('recruiterLoginBtn');
+            const result = document.getElementById('recruiterLoginResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            
+            const formData = {
+                email: document.getElementById('recruiterEmail').value,
+                password: document.getElementById('recruiterPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    recruiterToken = data.token;
+                    result.className = 'result success';
+                    result.textContent = `✅ Recruiter Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
+                    document.getElementById('getApplicationsBtn').disabled = false;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login Failed!\nError: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error!\n${error.message}`;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Login as Recruiter';
+        });
+
+        // Get Recruiter Applications
+        async function getRecruiterApplications() {
+            if (!recruiterToken) {
+                alert('Please login as recruiter first!');
+                return;
+            }
+
+            const result = document.getElementById('applicationsResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/applications/recruiter/all`, {
+                    headers: {
+                        'Authorization': `Bearer ${recruiterToken}`
+                    }
+                });
+
+                const applications = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Applications Retrieved!\nCount: ${applications.length}\n\n${JSON.stringify(applications, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Error loading applications: ${applications.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        // Get Jobs
+        async function getJobs() {
+            const result = document.getElementById('jobsResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/jobs`);
+                const jobs = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = `Available Jobs:\n${JSON.stringify(jobs, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `Error loading jobs: ${jobs.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `Network Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend-Backend Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .status { padding: 15px; margin: 10px 0; border-radius: 5px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .form-group { margin: 10px 0; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Frontend-Backend Connection Test</h1>
+        
+        <div class="status info">
+            <strong>Testing Connection:</strong><br>
+            Frontend: http://localhost:5173/<br>
+            Backend: http://localhost:3002/api<br>
+            <small>This page simulates the same requests your React app makes</small>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 1. Backend Health Check</h2>
+            <button onclick="testBackend()">Test Backend Connection</button>
+            <div id="backendResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔐 2. Test Login (Your Accounts)</h2>
+            <button onclick="testRecruiterLogin()">Test Recruiter Login</button>
+            <button onclick="testJobseekerLogin()">Test Job Seeker Login</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 3. Test Registration</h2>
+            <button onclick="testRegistration()">Test New User Registration</button>
+            <div id="registerResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>💼 4. Test Jobs API</h2>
+            <button onclick="testJobsAPI()">Test Get Jobs</button>
+            <div id="jobsResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🌐 5. Open Main Application</h2>
+            <div class="status warning">
+                If all tests above pass, your main application should work!
+            </div>
+            <button onclick="openMainApp()">Open Job Portal (http://localhost:5173)</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testBackend() {
+            showResult('backendResult', '🔄 Testing backend...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('backendResult', `✅ Backend Connected!<br>Status: ${response.status}<br>Message: ${data.message}<br>CORS Headers: ${response.headers.get('Access-Control-Allow-Credentials') ? 'Present' : 'Missing'}`, 'success');
+                } else {
+                    showResult('backendResult', `❌ Backend Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('backendResult', `❌ Connection Failed: ${error.message}<br><strong>This is the same error you're seeing in the main app!</strong>`, 'error');
+            }
+        }
+
+        async function testRecruiterLogin() {
+            showResult('loginResult', '🔄 Testing recruiter login...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'manishmodi0408@gmail.com',
+                        password: '987654'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('loginResult', `✅ Recruiter Login Successful!<br>Welcome: ${data.user.full_name}<br>Type: ${data.user.user_type}<br>Token: ${data.token ? 'Received' : 'Missing'}`, 'success');
+                } else {
+                    showResult('loginResult', `❌ Login Failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('loginResult', `❌ Login Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testJobseekerLogin() {
+            showResult('loginResult', '🔄 Testing job seeker login...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'manish1@gmail.com',
+                        password: '123456'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('loginResult', `✅ Job Seeker Login Successful!<br>Welcome: ${data.user.full_name}<br>Type: ${data.user.user_type}<br>Token: ${data.token ? 'Received' : 'Missing'}`, 'success');
+                } else {
+                    showResult('loginResult', `❌ Login Failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('loginResult', `❌ Login Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testRegistration() {
+            showResult('registerResult', '🔄 Testing registration...', 'info');
+            
+            const testUser = {
+                email: `test${Date.now()}@example.com`,
+                password: 'password123',
+                fullName: 'Test User',
+                userType: 'jobseeker'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testUser)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('registerResult', `✅ Registration Successful!<br>Email: ${testUser.email}<br>User ID: ${data.user._id}<br>Token: ${data.token ? 'Received' : 'Missing'}`, 'success');
+                } else {
+                    showResult('registerResult', `❌ Registration Failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('registerResult', `❌ Registration Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testJobsAPI() {
+            showResult('jobsResult', '🔄 Testing jobs API...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/jobs`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    let result = `✅ Jobs API Working!<br>Total Jobs: ${data.length}<br>`;
+                    if (data.length > 0) {
+                        result += `<br><strong>Sample Job:</strong><br>`;
+                        result += `Title: ${data[0].title}<br>`;
+                        result += `Company: ${data[0].company}<br>`;
+                        result += `Location: ${data[0].location}`;
+                    }
+                    showResult('jobsResult', result, 'success');
+                } else {
+                    showResult('jobsResult', `❌ Jobs API Failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('jobsResult', `❌ Jobs API Error: ${error.message}`, 'error');
+            }
+        }
+
+        function openMainApp() {
+            window.open('http://localhost:5173/', '_blank');
+        }
+
+        // Auto-test on page load
+        window.onload = () => {
+            testBackend();
+        };
+    </script>
+</body>
+</html>
