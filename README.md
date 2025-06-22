@@ -49,20 +49,26 @@ A full-stack job portal application built with React, Node.js, Express, and Mong
 
 ## 🚀 Quick Start
 
-### Option 1: One-Click Start (Recommended)
+### Option 1: MongoDB Version (Recommended)
 ```bash
-# Double-click this file to start everything:
-start-job-portal.bat
+# Double-click this file for full database integration:
+start-job-portal-mongodb.bat
 ```
 
-### Option 2: Manual Start
+### Option 2: Stable Test Version
+```bash
+# Double-click this file for stable test version:
+start-job-portal-stable.bat
+```
+
+### Option 3: Manual Start
 ```bash
 # Start Backend (Terminal 1)
 cd backend
-node server.js
+node server-mongodb.js
 
 # Start Frontend (Terminal 2)
-npm run dev
+npx vite
 ```
 
 ### Option 3: Using NPM Scripts
