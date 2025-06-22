@@ -63,13 +63,11 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Start server without MongoDB for now (to fix authentication issues)
+// Start server with MongoDB connection
 const startServer = async () => {
   try {
-    console.log('🔄 Starting server without MongoDB (temporary fix)...');
-
-    // Comment out MongoDB connection for now
-    // await connectDB();
+    console.log('🔄 Connecting to MongoDB...');
+    await connectDB();
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);

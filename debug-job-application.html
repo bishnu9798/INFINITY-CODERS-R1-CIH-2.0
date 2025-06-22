@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Job Application</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; background: #f0f0f0; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Debug Job Application Issue</h1>
+    
+    <div class="section">
+        <h2>Step 1: Check Available Jobs</h2>
+        <button onclick="checkJobs()">Get Jobs</button>
+        <div id="jobsResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Test Application with First Job</h2>
+        <button onclick="testApplication()">Test Application</button>
+        <div id="applicationResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Manual Test</h2>
+        <input type="text" id="manualJobId" placeholder="Enter Job ID" style="width: 200px; padding: 8px;">
+        <button onclick="testManualApplication()">Test with Manual ID</button>
+        <div id="manualResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3004/api';
+        let availableJobs = [];
+
+        async function checkJobs() {
+            const result = document.getElementById('jobsResult');
+            try {
+                const response = await fetch(`${API_BASE}/jobs`);
+                const jobs = await response.json();
+                availableJobs = jobs;
+                
+                result.innerHTML = `
+                    <h3>Found ${jobs.length} jobs:</h3>
+                    <pre>${JSON.stringify(jobs, null, 2)}</pre>
+                `;
+                
+                // Populate manual input with first job ID
+                if (jobs.length > 0) {
+                    document.getElementById('manualJobId').value = jobs[0].id;
+                }
+            } catch (error) {
+                result.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        }
+
+        async function testApplication() {
+            const result = document.getElementById('applicationResult');
+            
+            if (availableJobs.length === 0) {
+                result.innerHTML = '<strong>Error:</strong> No jobs available. Click "Get Jobs" first.';
+                return;
+            }
+            
+            const firstJob = availableJobs[0];
+            
+            try {
+                // Create a dummy file
+                const dummyFile = new File(['dummy resume content'], 'test-resume.pdf', { type: 'application/pdf' });
+                
+                const formData = new FormData();
+                formData.append('jobId', firstJob.id);
+                formData.append('resume', dummyFile);
+                
+                console.log('Sending application for job ID:', firstJob.id);
+                console.log('Job title:', firstJob.title);
+                
+                const response = await fetch(`${API_BASE}/applications`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                result.innerHTML = `
+                    <h3>Application Test Result:</h3>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>Job ID sent:</strong> ${firstJob.id}</p>
+                    <p><strong>Job title:</strong> ${firstJob.title}</p>
+                    <h4>Response:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                result.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        }
+
+        async function testManualApplication() {
+            const result = document.getElementById('manualResult');
+            const jobId = document.getElementById('manualJobId').value;
+            
+            if (!jobId) {
+                result.innerHTML = '<strong>Error:</strong> Please enter a job ID';
+                return;
+            }
+            
+            try {
+                // Create a dummy file
+                const dummyFile = new File(['dummy resume content'], 'manual-test-resume.pdf', { type: 'application/pdf' });
+                
+                const formData = new FormData();
+                formData.append('jobId', jobId);
+                formData.append('resume', dummyFile);
+                
+                console.log('Manual test - sending application for job ID:', jobId);
+                
+                const response = await fetch(`${API_BASE}/applications`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                result.innerHTML = `
+                    <h3>Manual Test Result:</h3>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>Job ID sent:</strong> ${jobId}</p>
+                    <h4>Response:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                result.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        }
+
+        // Auto-load jobs on page load
+        window.onload = () => {
+            checkJobs();
+        };
+    </script>
+</body>
+</html>

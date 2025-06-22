@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Job Application</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .job-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>Job Application Test</h1>
+    
+    <div class="test-section">
+        <h2>Step 1: View Available Jobs</h2>
+        <button onclick="loadJobs()">Load Jobs</button>
+        <div id="jobsResult" class="result"></div>
+        <div id="jobsList"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 2: Apply for a Job</h2>
+        <form id="applicationForm">
+            <label>Select Job:</label>
+            <select id="jobSelect" required>
+                <option value="">Select a job...</option>
+            </select>
+            
+            <label>Upload Resume:</label>
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" required>
+            
+            <button type="submit">Apply for Job</button>
+        </form>
+        <div id="applicationResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 3: View My Applications</h2>
+        <button onclick="loadMyApplications()">Load My Applications</button>
+        <div id="myApplicationsResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 4: View Recruiter Applications (if logged in as recruiter)</h2>
+        <button onclick="loadRecruiterApplications()">Load Recruiter Applications</button>
+        <div id="recruiterApplicationsResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3004/api';
+        let availableJobs = [];
+
+        async function loadJobs() {
+            const result = document.getElementById('jobsResult');
+            const jobsList = document.getElementById('jobsList');
+            const jobSelect = document.getElementById('jobSelect');
+            
+            try {
+                const response = await fetch(`${API_BASE}/jobs`);
+                const jobs = await response.json();
+                availableJobs = jobs;
+                
+                result.className = 'result success';
+                result.textContent = `✅ Found ${jobs.length} jobs`;
+                
+                // Clear previous options
+                jobSelect.innerHTML = '<option value="">Select a job...</option>';
+                jobsList.innerHTML = '';
+                
+                // Populate job cards and select options
+                jobs.forEach(job => {
+                    // Add to select dropdown
+                    const option = document.createElement('option');
+                    option.value = job.id;
+                    option.textContent = `${job.title} at ${job.company}`;
+                    jobSelect.appendChild(option);
+                    
+                    // Add job card
+                    const jobCard = document.createElement('div');
+                    jobCard.className = 'job-card';
+                    jobCard.innerHTML = `
+                        <h3>${job.title}</h3>
+                        <p><strong>Company:</strong> ${job.company}</p>
+                        <p><strong>Location:</strong> ${job.location}</p>
+                        <p><strong>Salary:</strong> ${job.salary || job.salaryRange || 'Not specified'}</p>
+                        <p><strong>Experience:</strong> ${job.experience}</p>
+                        <p><strong>Skills:</strong> ${Array.isArray(job.skills) ? job.skills.join(', ') : job.skills}</p>
+                        <p><strong>Job ID:</strong> ${job.id}</p>
+                    `;
+                    jobsList.appendChild(jobCard);
+                });
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Failed to load jobs: ${error.message}`;
+            }
+        }
+
+        async function loadMyApplications() {
+            const result = document.getElementById('myApplicationsResult');
+            try {
+                const response = await fetch(`${API_BASE}/applications/my-applications`);
+                const applications = await response.json();
+                
+                result.className = 'result success';
+                result.innerHTML = `✅ Found ${applications.length} applications:<br><pre>${JSON.stringify(applications, null, 2)}</pre>`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Failed to load applications: ${error.message}`;
+            }
+        }
+
+        async function loadRecruiterApplications() {
+            const result = document.getElementById('recruiterApplicationsResult');
+            try {
+                const response = await fetch(`${API_BASE}/applications/recruiter/all`);
+                const applications = await response.json();
+                
+                result.className = 'result success';
+                result.innerHTML = `✅ Found ${applications.length} recruiter applications:<br><pre>${JSON.stringify(applications, null, 2)}</pre>`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Failed to load recruiter applications: ${error.message}`;
+            }
+        }
+
+        document.getElementById('applicationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const result = document.getElementById('applicationResult');
+            const jobId = document.getElementById('jobSelect').value;
+            const resumeFile = document.getElementById('resumeFile').files[0];
+            
+            if (!jobId) {
+                result.className = 'result error';
+                result.textContent = '❌ Please select a job';
+                return;
+            }
+            
+            if (!resumeFile) {
+                result.className = 'result error';
+                result.textContent = '❌ Please select a resume file';
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('jobId', jobId);
+                formData.append('resume', resumeFile);
+                
+                console.log('Submitting application for job:', jobId);
+                console.log('Resume file:', resumeFile.name, resumeFile.size, resumeFile.type);
+                
+                const response = await fetch(`${API_BASE}/applications`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = `✅ Application submitted successfully!<br>Application ID: ${data.applicationId}<br><pre>${JSON.stringify(data.application, null, 2)}</pre>`;
+                    
+                    // Auto-refresh applications
+                    setTimeout(() => {
+                        loadMyApplications();
+                        loadRecruiterApplications();
+                    }, 1000);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Application failed: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network error: ${error.message}`;
+            }
+        });
+
+        // Auto-load jobs on page load
+        window.onload = () => {
+            loadJobs();
+            loadMyApplications();
+            loadRecruiterApplications();
+        };
+    </script>
+</body>
+</html>

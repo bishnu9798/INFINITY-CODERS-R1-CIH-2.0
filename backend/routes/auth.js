@@ -7,7 +7,7 @@ const User = require('../models/User.js');
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Register (temporary mock implementation)
+// Register
 router.post('/register', [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email address'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
@@ -22,11 +22,30 @@ router.post('/register', [
     }
 
     const { email, password, userType, fullName, companyName } = req.body;
-    console.log('Registration attempt for:', email, userType);
 
-    // Mock registration for testing
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    // Create new user
+    const userData = {
+      email,
+      password, // Will be hashed by the pre-save middleware
+      user_type: userType,
+      full_name: fullName
+    };
+
+    if (userType === 'recruiter' && companyName) {
+      userData.company_name = companyName;
+    }
+
+    const user = new User(userData);
+    await user.save();
+
     const token = jwt.sign(
-      { userId: Date.now().toString(), userType: userType, email: email },
+      { userId: user._id, userType: user.user_type, email: user.email },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -35,20 +54,19 @@ router.post('/register', [
       message: 'User created successfully',
       token,
       user: {
-        id: Date.now().toString(),
-        email: email,
-        userType: userType,
-        fullName: fullName,
-        companyName: companyName
+        id: user._id,
+        email: user.email,
+        userType: user.user_type,
+        fullName: user.full_name,
+        companyName: user.company_name
       }
     });
   } catch (error) {
-    console.error('Registration error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Login (temporary mock implementation)
+// Login
 router.post('/login', [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email address'),
   body('password').notEmpty().withMessage('Password is required')
@@ -61,50 +79,40 @@ router.post('/login', [
     }
 
     const { email, password } = req.body;
-    console.log('Login attempt for:', email);
 
-    // Mock authentication for testing
-    if (email === 'manishmodi0408@gmail.com' && password === '987654') {
-      const token = jwt.sign(
-        { userId: '1', userType: 'recruiter', email: email },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-
-      res.json({
-        message: 'Login successful',
-        token,
-        user: {
-          id: '1',
-          email: email,
-          userType: 'recruiter',
-          fullName: 'Manish Modi',
-          companyName: 'The Tech World'
-        }
-      });
-    } else if (email === 'manish1@gmail.com' && password === '123456') {
-      const token = jwt.sign(
-        { userId: '2', userType: 'jobseeker', email: email },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-
-      res.json({
-        message: 'Login successful',
-        token,
-        user: {
-          id: '2',
-          email: email,
-          userType: 'jobseeker',
-          fullName: 'Manish Kumar'
-        }
-      });
-    } else {
-      console.log('Invalid credentials for:', email);
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log('User not found for email:', email);
       return res.status(400).json({ error: 'Invalid credentials' });
     }
+
+    console.log('User found, checking password for:', email);
+    const isValidPassword = await user.comparePassword(password);
+    console.log('Password validation result:', isValidPassword);
+
+    if (!isValidPassword) {
+      console.log('Invalid password for user:', email);
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id, userType: user.user_type, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      message: 'Login successful',
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        userType: user.user_type,
+        fullName: user.full_name,
+        companyName: user.company_name
+      }
+    });
   } catch (error) {
-    console.error('Login error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
