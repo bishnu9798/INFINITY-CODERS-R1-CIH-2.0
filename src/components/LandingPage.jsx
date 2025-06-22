@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import AnimatedCounter from './AnimatedCounter';
 import FeatureCard from './FeatureCard';
 import TypingAnimation from './TypingAnimation';
+import ScrollToTop from './ScrollToTop';
+import NewsletterSignup from './NewsletterSignup';
+import SocialProof from './SocialProof';
+import InteractiveDemo from './InteractiveDemo';
+import FloatingActionButton from './FloatingActionButton';
+import LiveActivityFeed from './LiveActivityFeed';
+import './landing-page.css';
 
 const LandingPage = ({ onGetStarted, onLogin }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -164,6 +171,9 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
         <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-pink-200 rounded-full opacity-20 animate-bounce delay-1000"></div>
       </section>
 
+      {/* Social Proof Section */}
+      <SocialProof />
+
       {/* Stats Section */}
       <section className="py-16 bg-white/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -258,6 +268,9 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
+      {/* Interactive Demo Section */}
+      <InteractiveDemo onGetStarted={onGetStarted} />
+
       {/* Testimonials Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -272,7 +285,10 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
             </p>
           </div>
 
-          <div className="relative max-w-4xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+            {/* Testimonials Carousel */}
+            <div className="lg:col-span-2">
+              <div className="relative max-w-4xl mx-auto">
             <div className="overflow-hidden rounded-2xl">
               <div
                 className="flex transition-transform duration-500 ease-in-out"
@@ -304,6 +320,13 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                   }`}
                 />
               ))}
+            </div>
+          </div>
+            </div>
+
+            {/* Live Activity Feed */}
+            <div className="lg:col-span-1">
+              <LiveActivityFeed />
             </div>
           </div>
         </div>
@@ -520,6 +543,13 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
+      {/* Newsletter Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <NewsletterSignup />
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -568,6 +598,12 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
+
+      {/* Floating Action Button */}
+      <FloatingActionButton onGetStarted={onGetStarted} onLogin={onLogin} />
     </div>
   );
 };
