@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { authAPI, jobsAPI, applicationsAPI, usersAPI } from './services/api';
+import LandingPage from './components/LandingPage';
 import AdvancedJobSearch from './components/AdvancedJobSearch';
 import EnhancedJobCard from './components/EnhancedJobCard';
 import AssessmentSystem from './components/AssessmentSystem';
@@ -13,6 +14,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(true);
   const [jobs, setJobs] = useState([]);
   const [recruiterJobs, setRecruiterJobs] = useState([]);
   const [applications, setApplications] = useState([]);
@@ -79,6 +81,7 @@ export default function App() {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);
+        setShowLandingPage(false);
         loadJobs();
         loadUserProfile(); // Load profile for all users
         loadSavedJobs(); // Load saved jobs
@@ -322,6 +325,7 @@ export default function App() {
 
       setUser(userWithId);
       setIsAuthenticated(true);
+      setShowLandingPage(false);
       setActiveTab('dashboard');
 
       // Load user-specific data
@@ -364,6 +368,7 @@ export default function App() {
 
       setUser(userWithId);
       setIsAuthenticated(true);
+      setShowLandingPage(false);
       setActiveTab('dashboard');
 
       loadJobs();
@@ -396,6 +401,7 @@ export default function App() {
     localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
+    setShowLandingPage(true);
     setActiveTab('dashboard');
     setApplications([]);
     setRecruiterApplications([]);
@@ -1642,6 +1648,15 @@ export default function App() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          {/* Back to Landing Page Button */}
+          <div className="mb-4">
+            <button
+              onClick={() => setShowLandingPage(true)}
+              className="flex items-center text-blue-600 hover:text-blue-500 text-sm font-medium"
+            >
+              ← Back to Home
+            </button>
+          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             {isLogin ? 'Sign in to your account' : 'Create your account'}
           </h2>
@@ -2083,6 +2098,22 @@ export default function App() {
       )}
     </div>
   );
+
+  // Show landing page for new visitors
+  if (showLandingPage && !isAuthenticated) {
+    return (
+      <LandingPage
+        onGetStarted={() => {
+          setShowLandingPage(false);
+          setIsLogin(false); // Show registration form
+        }}
+        onLogin={() => {
+          setShowLandingPage(false);
+          setIsLogin(true); // Show login form
+        }}
+      />
+    );
+  }
 
   if (!isAuthenticated) {
     return renderLoginPage();
