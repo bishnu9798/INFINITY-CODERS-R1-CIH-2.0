@@ -1,5 +1,5 @@
 @echo off
 echo Starting Backend Server with MongoDB...
 cd backend
-node server.js
+node server-mongodb.js
 pause

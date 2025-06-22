@@ -65,20 +65,72 @@ app.use('*', (req, res) => {
 
 // Start server with MongoDB connection
 const startServer = async () => {
-  try {
-    console.log('🔄 Connecting to MongoDB...');
-    await connectDB();
+  console.log('🚀 Starting Job Portal Server...');
+  console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+  console.log('📍 Port:', PORT);
 
-    app.listen(PORT, () => {
+  try {
+    // Add timeout for MongoDB connection
+    console.log('🔄 Connecting to MongoDB...');
+    const connectionPromise = connectDB();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('MongoDB connection timeout after 20 seconds')), 20000);
+    });
+
+    await Promise.race([connectionPromise, timeoutPromise]);
+    console.log('✅ MongoDB connection successful');
+
+    // Start the HTTP server
+    console.log('🔄 Starting HTTP server...');
+    const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📊 API Health: http://localhost:${PORT}/api/health`);
-      console.log(`🔧 Environment: ${process.env.NODE_ENV}`);
+      console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📁 Current directory: ${process.cwd()}`);
       console.log(`🌐 CORS enabled for: http://localhost:5173`);
       console.log(`⚡ Ready to receive requests!`);
+      console.log('');
+      console.log('🎯 Test the server:');
+      console.log(`   curl http://localhost:${PORT}/api/health`);
+      console.log('');
     });
+
+    server.on('error', (err) => {
+      console.error('❌ Server error:', err);
+      if (err.code === 'EADDRINUSE') {
+        console.log(`❌ Port ${PORT} is in use. Please check for other running processes.`);
+        console.log('💡 Try: netstat -ano | findstr :' + PORT);
+        process.exit(1);
+      }
+    });
+
+    server.on('listening', () => {
+      console.log('✅ Server is listening and ready');
+    });
+
+    // Handle server shutdown gracefully
+    const gracefulShutdown = () => {
+      console.log('\n🔄 Received shutdown signal, closing server gracefully...');
+      server.close(() => {
+        console.log('✅ HTTP server closed');
+        process.exit(0);
+      });
+    };
+
+    process.on('SIGINT', gracefulShutdown);
+    process.on('SIGTERM', gracefulShutdown);
+
   } catch (error) {
     console.error('❌ Failed to start server:', error.message);
+    console.error('❌ Full error:', error);
+
+    if (error.message.includes('timeout')) {
+      console.log('💡 MongoDB connection timed out. Please check:');
+      console.log('   1. Internet connection');
+      console.log('   2. MongoDB Atlas cluster status');
+      console.log('   3. Network firewall settings');
+    }
+
     process.exit(1);
   }
 };
