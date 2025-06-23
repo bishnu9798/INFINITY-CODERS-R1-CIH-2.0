@@ -3,11 +3,9 @@ import AnimatedCounter from './AnimatedCounter';
 import FeatureCard from './FeatureCard';
 import TypingAnimation from './TypingAnimation';
 import ScrollToTop from './ScrollToTop';
-import NewsletterSignup from './NewsletterSignup';
 import SocialProof from './SocialProof';
 import InteractiveDemo from './InteractiveDemo';
 import FloatingActionButton from './FloatingActionButton';
-import LiveActivityFeed from './LiveActivityFeed';
 import './landing-page.css';
 
 const LandingPage = ({ onGetStarted, onLogin }) => {
@@ -277,10 +275,9 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+          <div className="max-w-4xl mx-auto">
             {/* Testimonials Carousel */}
-            <div className="lg:col-span-2">
-              <div className="relative max-w-4xl mx-auto">
+            <div className="relative">
             <div className="overflow-hidden rounded-2xl">
               <div
                 className="flex transition-transform duration-500 ease-in-out"
@@ -315,21 +312,10 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
             </div>
           </div>
             </div>
-
-            {/* Live Activity Feed */}
-            <div className="lg:col-span-1">
-              <LiveActivityFeed />
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <NewsletterSignup />
-        </div>
-      </section>
+
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
@@ -347,12 +333,12 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Platform</h3>
+              <h3 className="text-lg font-semibold mb-4">For talent</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Find Jobs</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Post Jobs</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Freelance</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Companies</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">How to hire</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Talent marketplace</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">hire an agency</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Direct contracts</a></li>
               </ul>
             </div>
             <div>
@@ -375,7 +361,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Freelancer-market-place. All rights reserved.</p>
+            <p>&copy; 2025 FREELANCER MARKET PLACE. All rights reserved.</p>
           </div>
         </div>
       </footer>

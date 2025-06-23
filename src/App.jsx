@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { authAPI, jobsAPI, applicationsAPI, usersAPI } from './services/api';
+import { authAPI, jobsAPI, applicationsAPI, usersAPI } from './services/api-mock-backup';
 import LandingPage from './components/LandingPage';
 import AdvancedJobSearch from './components/AdvancedJobSearch';
 import EnhancedJobCard from './components/EnhancedJobCard';

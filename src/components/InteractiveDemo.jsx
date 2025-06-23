@@ -6,8 +6,8 @@ const InteractiveDemo = ({ onGetStarted }) => {
 
   const jobseekerSteps = [
     {
-      title: "Create Your Profile",
-      description: "Build a comprehensive profile with your skills and experience",
+      title: "CREATE YOUR PROFILE",
+      description: "Build a comprehensive profile with your details",
       preview: (
         <div className="bg-white rounded-lg p-4 shadow-md">
           <div className="flex items-center mb-4">
@@ -15,8 +15,8 @@ const InteractiveDemo = ({ onGetStarted }) => {
               JD
             </div>
             <div className="ml-3">
-              <h3 className="font-semibold">John Doe</h3>
-              <p className="text-sm text-gray-600">Full Stack Developer</p>
+              <h3 className="font-semibold">STEVE SMITH</h3>
+              <p className="text-sm text-gray-600">FULL STACK DEVELOPER</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -30,31 +30,31 @@ const InteractiveDemo = ({ onGetStarted }) => {
       )
     },
     {
-      title: "Browse & Apply to Jobs",
-      description: "Discover opportunities that match your skills and interests",
+      title: "BROWSE & FIND TALENTS",
+      description: "Discover reliable professionals by exploring their portfolios and immersing yourself in the feedback shared on their profiles.",
       preview: (
         <div className="bg-white rounded-lg p-4 shadow-md">
-          <h3 className="font-semibold mb-2">Senior React Developer</h3>
-          <p className="text-sm text-gray-600 mb-2">TechCorp • Remote • $80k-$120k</p>
-          <p className="text-xs text-gray-500 mb-3">Posted 2 days ago</p>
+          <h3 className="font-semibold mb-2">SENIOR REACT DEVELOPER</h3>
+          <p className="text-sm text-gray-600 mb-2"></p>
+          <p className="text-xs text-gray-500 mb-3"></p>
           <button className="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition-colors">
-            Apply Now
+            APPLY NOW
           </button>
         </div>
       )
     },
     {
-      title: "Get Hired & Paid",
-      description: "Secure your dream job and receive payments through our platform",
+      title: "CONNECTS AND HIER A FREELANCER",
+      description: "Hier a Freelancer as per your need and requirements",
       preview: (
         <div className="bg-white rounded-lg p-4 shadow-md">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Application Status</span>
+            <span className="text-sm font-medium">EOIN MORGAN</span>
             <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Hired!</span>
           </div>
           <div className="text-sm text-gray-600">
-            <p>Congratulations! You've been selected for the position.</p>
-            <p className="mt-2 font-medium text-green-600">💰 First payment: $5,000</p>
+            <p></p>
+            <p className="mt-2 font-medium text-green-600"> CONTACT - morgan@gmail.com</p>
           </div>
         </div>
       )
@@ -63,60 +63,60 @@ const InteractiveDemo = ({ onGetStarted }) => {
 
   const recruiterSteps = [
     {
-      title: "Post Your Job",
-      description: "Create detailed job postings to attract the right candidates",
+      title: "CREAT YOUR PROFILE",
+      description: "Create detailed Freelance job postings to attract the right clients",
       preview: (
         <div className="bg-white rounded-lg p-4 shadow-md">
-          <h3 className="font-semibold mb-2">Create Job Posting</h3>
+          <h3 className="font-semibold mb-2">PROFILE SETUP</h3>
           <div className="space-y-2">
-            <input className="w-full border rounded px-3 py-2 text-sm" placeholder="Job Title" value="Senior React Developer" readOnly />
-            <input className="w-full border rounded px-3 py-2 text-sm" placeholder="Company" value="TechCorp" readOnly />
-            <input className="w-full border rounded px-3 py-2 text-sm" placeholder="Salary Range" value="$80k-$120k" readOnly />
+            <input className="w-full border rounded px-3 py-2 text-sm" placeholder="Job Title" value="VIDEO EDITOR" readOnly />
+            <input className="w-full border rounded px-3 py-2 text-sm" placeholder="Company" value="TECHPROS" readOnly />
+            <input className="w-full border rounded px-3 py-2 text-sm" placeholder="Salary Range" value="60$" readOnly />
           </div>
         </div>
       )
     },
     {
-      title: "Review Applications",
-      description: "Browse through qualified candidates and their profiles",
+      title: "POST YOUR FREELANCING SERVICE",
+      description: "Add the qualified jobs and services to your files",
       preview: (
         <div className="bg-white rounded-lg p-4 shadow-md">
-          <h3 className="font-semibold mb-3">Applications (24)</h3>
+          <h3 className="font-semibold mb-3"> SERVICES (5)</h3>
           <div className="space-y-2">
             <div className="flex items-center justify-between p-2 border rounded">
               <div className="flex items-center">
                 <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                  JD
+                  5
                 </div>
                 <div className="ml-2">
-                  <p className="text-sm font-medium">John Doe</p>
-                  <p className="text-xs text-gray-600">5 years exp.</p>
+                  <p className="text-sm font-medium"></p>
+                  <p className="text-xs text-gray-600"></p>
                 </div>
               </div>
-              <button className="bg-blue-500 text-white px-3 py-1 rounded text-xs">Review</button>
+              <button className="bg-blue-500 text-white px-3 py-1 rounded text-xs"> GRAPHIC DESIGN</button>
             </div>
           </div>
         </div>
       )
     },
     {
-      title: "Hire & Manage",
-      description: "Select the best candidates and manage your team",
+      title: "REVIEW APPLICATIONS",
+      description: "Select the best applications and connects with them",
       preview: (
         <div className="bg-white rounded-lg p-4 shadow-md">
-          <h3 className="font-semibold mb-2">Team Dashboard</h3>
+          <h3 className="font-semibold mb-2">APPLICATIONS</h3>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm">Active Projects</span>
+              <span className="text-sm">Active applications</span>
               <span className="font-bold text-blue-600">12</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm">Team Members</span>
-              <span className="font-bold text-green-600">8</span>
+              <span className="text-sm"></span>
+              <span className="font-bold text-green-600"></span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm">This Month's Budget</span>
-              <span className="font-bold text-purple-600">$45,000</span>
+              <span className="text-sm"></span>
+              <span className="font-bold text-purple-600"></span>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ const InteractiveDemo = ({ onGetStarted }) => {
                     : 'text-gray-600 hover:text-blue-600'
                 }`}
               >
-                👨‍💻 Job Seeker View
+                HIRE A FREELANCER
               </button>
               <button
                 onClick={() => {
@@ -166,7 +166,7 @@ const InteractiveDemo = ({ onGetStarted }) => {
                     : 'text-gray-600 hover:text-blue-600'
                 }`}
               >
-                👔 Recruiter View
+                REGISTER AS A FREELANCER
               </button>
             </div>
           </div>
