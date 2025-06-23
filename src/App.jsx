@@ -678,9 +678,10 @@ export default function App() {
       );
     }
 
+    // Only show client (jobseeker) fields
     return (
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
+        <h2 className="text-2xl font-bold mb-6">PROFILE SETTINGS</h2>
 
         {profileError && (
           <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -697,21 +698,14 @@ export default function App() {
               email: form.email.value,
               phone: form.phone.value,
               location: form.location.value,
-              skills: form.skills.value,
-              experienceLevel: form.experienceLevel.value,
-              bio: form.bio.value,
-              linkedinUrl: form.linkedinUrl?.value || '',
-              githubUrl: form.githubUrl?.value || '',
-              portfolioUrl: form.portfolioUrl?.value || '',
-              expectedSalary: form.expectedSalary?.value || '',
-              availability: form.availability?.value || 'immediately'
+              companyName: form.companyName?.value || '',
             };
             updateUserProfile(profileData);
           }} className="space-y-6">
 
-            {/* Basic Information Section */}
+            {/* Client Information Section */}
             <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Client Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
@@ -753,118 +747,16 @@ export default function App() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* Professional Information Section */}
-            <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Information</h3>
-              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
                   <input
                     type="text"
-                    name="skills"
-                    defaultValue={userProfile?.skills || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., JavaScript, React, Node.js, Python, SQL"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Separate skills with commas</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
-                    <select
-                      name="experienceLevel"
-                      defaultValue={userProfile?.experience_level || 'entry'}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="entry">Entry Level</option>
-                      <option value="1-2">1-2 years</option>
-                      <option value="2-4">2-4 years</option>
-                      <option value="4-6">4-6 years</option>
-                      <option value="6+">6+ years</option>
-                      <option value="senior">Senior Level</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Expected Salary</label>
-                    <input
-                      type="text"
-                      name="expectedSalary"
-                      defaultValue={userProfile?.expected_salary || ''}
-                      placeholder="e.g., $60,000 - $80,000"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Availability</label>
-                  <select
-                    name="availability"
-                    defaultValue={userProfile?.availability || 'immediately'}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="immediately">Available Immediately</option>
-                    <option value="2weeks">2 weeks notice</option>
-                    <option value="1month">1 month notice</option>
-                    <option value="2months">2 months notice</option>
-                    <option value="3months">3+ months</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Links Section */}
-            <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Links</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
-                  <input
-                    type="url"
-                    name="linkedinUrl"
-                    defaultValue={userProfile?.linkedin_url || ''}
-                    placeholder="https://linkedin.com/in/yourprofile"
+                    name="companyName"
+                    defaultValue={userProfile?.company_name || user?.companyName || ''}
+                    placeholder="Your company (optional)"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">GitHub URL</label>
-                  <input
-                    type="url"
-                    name="githubUrl"
-                    defaultValue={userProfile?.github_url || ''}
-                    placeholder="https://github.com/yourusername"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Portfolio URL</label>
-                  <input
-                    type="url"
-                    name="portfolioUrl"
-                    defaultValue={userProfile?.portfolio_url || ''}
-                    placeholder="https://yourportfolio.com"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Bio Section */}
-            <div className="pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">About You</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Professional Bio</label>
-                <textarea
-                  name="bio"
-                  defaultValue={userProfile?.bio || ''}
-                  rows="6"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Tell us about yourself, your experience, and what you're looking for in your next project..."
-                ></textarea>
-                <p className="text-xs text-gray-500 mt-1">This will be visible to freelancers when you apply for projects</p>
               </div>
             </div>
 
@@ -907,51 +799,8 @@ export default function App() {
                 <span className="font-medium text-gray-700">Location:</span> {userProfile.location || 'Not set'}
               </div>
               <div>
-                <span className="font-medium text-gray-700">Experience:</span> {userProfile.experience_level || 'Not set'}
+                <span className="font-medium text-gray-700">Company:</span> {userProfile.company_name || 'Not set'}
               </div>
-              <div>
-                <span className="font-medium text-gray-700">Availability:</span> {userProfile.availability || 'Not set'}
-              </div>
-              {userProfile.skills && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Skills:</span> {userProfile.skills}
-                </div>
-              )}
-              {userProfile.expected_salary && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Expected Salary:</span> {userProfile.expected_salary}
-                </div>
-              )}
-              {userProfile.linkedin_url && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">LinkedIn:</span>
-                  <a href={userProfile.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                    {userProfile.linkedin_url}
-                  </a>
-                </div>
-              )}
-              {userProfile.github_url && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">GitHub:</span>
-                  <a href={userProfile.github_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                    {userProfile.github_url}
-                  </a>
-                </div>
-              )}
-              {userProfile.portfolio_url && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Portfolio:</span>
-                  <a href={userProfile.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                    {userProfile.portfolio_url}
-                  </a>
-                </div>
-              )}
-              {userProfile.bio && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Bio:</span>
-                  <p className="mt-1 text-gray-600">{userProfile.bio}</p>
-                </div>
-              )}
             </div>
           </div>
         )}
