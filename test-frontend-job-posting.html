@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend Job Posting</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        input, textarea, select { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Frontend Job Posting Debug</h1>
+        
+        <div class="section">
+            <h2>Step 1: Login as Recruiter</h2>
+            <input type="email" id="email" placeholder="Email" value="manishmodi0408@gmail.com">
+            <input type="password" id="password" placeholder="Password" value="987654">
+            <button onclick="login()">Login</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>Step 2: Check Authentication</h2>
+            <button onclick="checkAuth()">Check Current Auth Status</button>
+            <div id="authResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>Step 3: Post Job (Frontend Style)</h2>
+            <form id="jobForm">
+                <input type="text" name="title" placeholder="Job Title" value="Frontend Test Job" required>
+                <input type="text" name="company" placeholder="Company" value="Test Company" required>
+                <input type="text" name="location" placeholder="Location" value="Remote" required>
+                <input type="text" name="experience" placeholder="Experience" value="2+ years">
+                <input type="text" name="skills" placeholder="Skills (comma-separated)" value="React, JavaScript, CSS">
+                <input type="text" name="salaryRange" placeholder="Salary Range" value="$60,000 - $80,000">
+                <select name="jobType">
+                    <option value="full-time">Full-time</option>
+                    <option value="part-time">Part-time</option>
+                    <option value="contract">Contract</option>
+                </select>
+                <textarea name="description" placeholder="Job Description">This is a test job posting from the frontend debug tool.</textarea>
+                <button type="submit">Post Job</button>
+            </form>
+            <div id="jobResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>Step 4: Raw API Test</h2>
+            <button onclick="testRawAPI()">Test Raw API Call</button>
+            <div id="rawResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002/api';
+        let currentToken = null;
+
+        // Check if already logged in
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            if (token && user) {
+                currentToken = token;
+                document.getElementById('authResult').innerHTML = `
+                    <div class="success">
+                        ✅ Already logged in<br>
+                        User: ${JSON.parse(user).fullName}<br>
+                        Type: ${JSON.parse(user).userType}<br>
+                        Token: ${token.substring(0, 20)}...
+                    </div>
+                `;
+            }
+        };
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('loginResult');
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentToken = data.token;
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        ✅ Login successful!<br>
+                        User: ${data.user.fullName}<br>
+                        Type: ${data.user.userType}<br>
+                        Token: ${data.token.substring(0, 20)}...
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Login failed: ${data.error}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network error: ${error.message}`;
+            }
+        }
+
+        async function checkAuth() {
+            const result = document.getElementById('authResult');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            if (!token) {
+                result.className = 'result error';
+                result.textContent = '❌ No token found. Please login first.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        ✅ Authentication valid<br>
+                        User: ${userData.full_name}<br>
+                        Type: ${userData.user_type}<br>
+                        Email: ${userData.email}
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ Auth check failed: ${response.status}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Auth check error: ${error.message}`;
+            }
+        }
+
+        document.getElementById('jobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const result = document.getElementById('jobResult');
+            const form = e.target;
+
+            if (!currentToken && !localStorage.getItem('token')) {
+                result.className = 'result error';
+                result.textContent = '❌ Please login first!';
+                return;
+            }
+
+            // Prepare job data exactly like the frontend does
+            const jobData = {
+                title: form.title.value,
+                company: form.company.value,
+                location: form.location.value,
+                experience: form.experience.value,
+                skills: form.skills.value.split(',').map(skill => skill.trim()), // Array format
+                description: form.description.value,
+                salaryRange: form.salaryRange.value || '',
+                jobType: form.jobType.value || 'full-time'
+            };
+
+            console.log('Job data being sent:', jobData);
+
+            try {
+                const token = currentToken || localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(jobData)
+                });
+
+                const data = await response.json();
+                console.log('Response:', data);
+
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        ✅ Job posted successfully!<br>
+                        Job ID: ${data.jobId}<br>
+                        Response: ${JSON.stringify(data, null, 2)}
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        ❌ Job posting failed!<br>
+                        Status: ${response.status}<br>
+                        Error: ${JSON.stringify(data, null, 2)}
+                    `;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network error: ${error.message}`;
+            }
+        });
+
+        async function testRawAPI() {
+            const result = document.getElementById('rawResult');
+            const token = currentToken || localStorage.getItem('token');
+
+            if (!token) {
+                result.className = 'result error';
+                result.textContent = '❌ Please login first!';
+                return;
+            }
+
+            const jobData = {
+                title: 'Raw API Test Job',
+                company: 'Raw Test Company',
+                location: 'Raw Location',
+                experience: '1+ years',
+                skills: 'JavaScript,Node.js', // String format
+                description: 'This is a raw API test job.',
+                salaryRange: '$50,000 - $70,000',
+                jobType: 'full-time'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(jobData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        ✅ Raw API test successful!<br>
+                        Job ID: ${data.jobId}<br>
+                        Response: ${JSON.stringify(data, null, 2)}
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        ❌ Raw API test failed!<br>
+                        Status: ${response.status}<br>
+                        Error: ${JSON.stringify(data, null, 2)}
+                    `;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Network error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 @echo off
-echo 🛑 Stopping Job Portal System...
+echo 🛑 Stopping Freelancer-market-place System...
 echo.
 
 REM Kill all node processes
@@ -12,7 +12,7 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3002') do taskkill /f /pid %
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :5173') do taskkill /f /pid %%a >nul 2>&1
 
 echo.
-echo ✅ Job Portal Stopped Successfully!
+echo ✅ Freelancer-market-place Stopped Successfully!
 echo.
 echo 💡 To start again, run: start-job-portal.bat
 echo.

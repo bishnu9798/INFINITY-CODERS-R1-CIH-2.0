@@ -1,5 +1,5 @@
-// Service Worker for Job Portal PWA
-const CACHE_NAME = 'job-portal-v1';
+// Service Worker for Freelancer-market-place PWA
+const CACHE_NAME = 'freelancer-market-place-v1';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',

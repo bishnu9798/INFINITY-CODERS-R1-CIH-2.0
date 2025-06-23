@@ -12,7 +12,7 @@ const ChatBot = ({ darkMode, user, data, onSave }) => {
     general: {
       greeting: [
         "Hello! I'm your AI assistant. How can I help you today?",
-        "Hi there! I'm here to help with any questions about our job portal.",
+        "Hi there! I'm here to help with any questions about our freelancer marketplace.",
         "Welcome! I can assist you with job searches, applications, and more."
       ],
       jobSearch: [

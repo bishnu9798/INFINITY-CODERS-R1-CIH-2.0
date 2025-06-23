@@ -1,9 +1,9 @@
 # INFINITY-CODERS-R1-CIH-2.0
 ## CENTRAL INDIA HACKATHON 2.0
 
-# 🚀 Job Portal Application
+# 🚀 Freelancer-market-place Application
 
-A full-stack job portal application built with React, Node.js, Express, and MongoDB.
+A full-stack freelancer marketplace application built with React, Node.js, Express, and MongoDB.
 
 ## 🌟 Features
 
@@ -55,13 +55,13 @@ A full-stack job portal application built with React, Node.js, Express, and Mong
 ### Option 1: MongoDB Version (Recommended)
 ```bash
 # Double-click this file for full database integration:
-start-job-portal-mongodb.bat
+start-freelancer-market-place-mongodb.bat
 ```
 
 ### Option 2: Stable Test Version
 ```bash
 # Double-click this file for stable test version:
-start-job-portal-stable.bat
+start-freelancer-market-place-stable.bat
 ```
 
 ### Option 3: Manual Start
@@ -104,14 +104,14 @@ npm run start:full
 
 ### Start System
 ```bash
-start-job-portal.bat    # Windows batch file
+start-freelancer-market-place.bat    # Windows batch file
 # OR
 npm run start:full      # NPM script
 ```
 
 ### Stop System
 ```bash
-stop-job-portal.bat     # Windows batch file
+stop-freelancer-market-place.bat     # Windows batch file
 # OR
 npm run stop           # NPM script
 ```
@@ -140,7 +140,7 @@ npm run check         # NPM script
    - Check if ports 3002 and 5173 are available
 
 2. **"Port already in use"**
-   - Run `stop-job-portal.bat` first
+   - Run `stop-freelancer-market-place.bat` first
    - Wait 5 seconds, then start again
 
 3. **"Cannot connect to MongoDB"**
@@ -166,14 +166,14 @@ npm run check         # NPM script
 
 3. **Restart Everything**:
    ```bash
-   stop-job-portal.bat
-   start-job-portal.bat
+   stop-freelancer-market-place.bat
+   start-freelancer-market-place.bat
    ```
 
 ## 📁 Project Structure
 
 ```
-job-portal/
+freelancer-market-place/
 ├── backend/                 # Backend server
 │   ├── models/             # MongoDB models
 │   ├── routes/             # API routes
@@ -196,8 +196,8 @@ job-portal/
 │   │   └── landing-page.css         # Custom animations
 │   ├── services/          # API services
 │   └── App.jsx           # Main app component
-├── start-job-portal.bat   # Start script
-├── stop-job-portal.bat    # Stop script
+├── start-freelancer-market-place.bat   # Start script
+├── stop-freelancer-market-place.bat    # Stop script
 ├── check-system.bat       # Health check
 └── README.md             # This file
 ```
@@ -276,7 +276,7 @@ If everything is working correctly, you should see:
 If you encounter any issues:
 1. Run the health check: `check-system.bat`
 2. Check the troubleshooting section above
-3. Restart the system: `stop-job-portal.bat` then `start-job-portal.bat`
+3. Restart the system: `stop-freelancer-market-place.bat` then `start-freelancer-market-place.bat`
 
 ---
 

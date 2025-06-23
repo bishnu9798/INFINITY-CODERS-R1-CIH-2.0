@@ -1,9 +1,9 @@
-# 🚀 Job Portal - Startup Guide
+# 🚀 Freelancer-market-place - Startup Guide
 
 ## ⚡ Quick Start (Every Time You Want to Use the App)
 
 ### Method 1: One-Click Start (Easiest)
-1. **Double-click**: `start-job-portal.bat`
+1. **Double-click**: `start-freelancer-market-place.bat`
 2. **Wait**: 10-15 seconds for both servers to start
 3. **Browser opens automatically** to http://localhost:5173/
 
@@ -22,7 +22,7 @@
 ## 🛑 How to Stop
 
 ### Method 1: One-Click Stop
-- **Double-click**: `stop-job-portal.bat`
+- **Double-click**: `stop-freelancer-market-place.bat`
 
 ### Method 2: Manual Stop
 - **Close both terminal windows** or press `Ctrl+C` in each
@@ -89,9 +89,9 @@ After starting successfully, you should be able to:
 
 ## 🔄 Restart Process (If Issues Occur)
 
-1. **Stop**: `stop-job-portal.bat`
+1. **Stop**: `stop-freelancer-market-place.bat`
 2. **Wait**: 5 seconds
-3. **Start**: `start-job-portal.bat`
+3. **Start**: `start-freelancer-market-place.bat`
 4. **Wait**: 15 seconds for full startup
 5. **Test**: Try logging in
 
@@ -109,7 +109,7 @@ After starting successfully, you should be able to:
 
 You know everything is working when:
 - ✅ Two terminal windows are open and running
-- ✅ http://localhost:5173/ loads the job portal
+- ✅ http://localhost:5173/ loads the freelancer marketplace
 - ✅ You can login without "network error"
 - ✅ Jobs are visible on the dashboard
 

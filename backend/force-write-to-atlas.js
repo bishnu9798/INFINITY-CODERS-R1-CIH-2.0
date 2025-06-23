@@ -37,7 +37,7 @@ const applicationSchema = new mongoose.Schema({
 async function forceWriteToAtlas() {
   try {
     // Connect with database name in the URI
-    const connectionString = `mongodb+srv://manishkumarcse07:manishkaju1234554321@cluster0.u1j1h2t.mongodb.net/jobportal?retryWrites=true&w=majority&appName=Cluster0`;
+    const connectionString = `mongodb+srv://manishkumarcse07:infinitycoders%406604025@cluster0.6tyf80w.mongodb.net/Freelancer-market?retryWrites=true&w=majority&appName=Cluster0`;
     
     console.log('🔄 Connecting to MongoDB Atlas with explicit database name...');
     await mongoose.connect(connectionString);

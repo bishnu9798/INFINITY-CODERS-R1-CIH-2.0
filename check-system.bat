@@ -1,5 +1,5 @@
 @echo off
-echo 🔍 Job Portal System Health Check
+echo 🔍 Freelancer-market-place System Health Check
 echo.
 
 REM Check Node.js

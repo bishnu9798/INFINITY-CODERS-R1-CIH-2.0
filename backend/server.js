@@ -65,7 +65,7 @@ app.use('*', (req, res) => {
 
 // Start server with MongoDB connection
 const startServer = async () => {
-  console.log('🚀 Starting Job Portal Server...');
+  console.log('🚀 Starting Freelancer-market-place Server...');
   console.log('📍 Environment:', process.env.NODE_ENV || 'development');
   console.log('📍 Port:', PORT);
 
