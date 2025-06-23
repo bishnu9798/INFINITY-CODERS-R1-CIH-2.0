@@ -23,9 +23,9 @@
 <body>
     <h1>Test Recruiter Applications Flow</h1>
 
-    <!-- Step 1: Login as Job Seeker -->
+    <!-- Step 1: Login as Client -->
     <div class="test-section">
-        <h2>Step 1: Login as Job Seeker</h2>
+        <h2>Step 1: Login as Client</h2>
         <form id="jobseekerLoginForm">
             <div class="form-group">
                 <label>Email:</label>
@@ -35,14 +35,14 @@
                 <label>Password:</label>
                 <input type="password" id="jobseekerPassword" value="password123" required>
             </div>
-            <button type="submit" id="jobseekerLoginBtn">Login as Job Seeker</button>
+            <button type="submit" id="jobseekerLoginBtn">Login as Client</button>
         </form>
         <div id="jobseekerLoginResult" class="result"></div>
     </div>
 
-    <!-- Step 2: Apply for Job -->
+    <!-- Step 2: Apply for Job (as Client) -->
     <div class="test-section">
-        <h2>Step 2: Apply for Job (as Job Seeker)</h2>
+        <h2>Step 2: Apply for Job (as Client)</h2>
         <form id="applicationForm">
             <div class="form-group">
                 <label>Job ID:</label>
@@ -57,9 +57,9 @@
         <div id="applicationResult" class="result"></div>
     </div>
 
-    <!-- Step 3: Login as Recruiter -->
+    <!-- Step 3: Login as Freelancer -->
     <div class="test-section">
-        <h2>Step 3: Login as Recruiter</h2>
+        <h2>Step 3: Login as Freelancer</h2>
         <form id="recruiterLoginForm">
             <div class="form-group">
                 <label>Email:</label>
@@ -69,14 +69,14 @@
                 <label>Password:</label>
                 <input type="password" id="recruiterPassword" value="password123" required>
             </div>
-            <button type="submit" id="recruiterLoginBtn">Login as Recruiter</button>
+            <button type="submit" id="recruiterLoginBtn">Login as Freelancer</button>
         </form>
         <div id="recruiterLoginResult" class="result"></div>
     </div>
 
-    <!-- Step 4: Check Recruiter Applications -->
+    <!-- Step 4: Check Freelancer Applications -->
     <div class="test-section">
-        <h2>Step 4: Check Recruiter Applications</h2>
+        <h2>Step 4: Check Freelancer Applications</h2>
         <button onclick="getRecruiterApplications()" id="getApplicationsBtn" disabled>Get Applications</button>
         <div id="applicationsResult" class="result"></div>
     </div>
@@ -119,7 +119,7 @@
                 if (response.ok) {
                     jobseekerToken = data.token;
                     result.className = 'result success';
-                    result.textContent = `✅ Job Seeker Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
+                    result.textContent = `✅ Client Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
                     document.getElementById('applyBtn').disabled = false;
                 } else {
                     result.className = 'result error';
@@ -131,7 +131,7 @@
             }
             
             btn.disabled = false;
-            btn.textContent = 'Login as Job Seeker';
+            btn.textContent = 'Login as Client';
         });
 
         // Job Application
@@ -139,7 +139,7 @@
             e.preventDefault();
             
             if (!jobseekerToken) {
-                alert('Please login as job seeker first!');
+                alert('Please login as client first!');
                 return;
             }
 
@@ -206,7 +206,7 @@
                 if (response.ok) {
                     recruiterToken = data.token;
                     result.className = 'result success';
-                    result.textContent = `✅ Recruiter Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
+                    result.textContent = `✅ Freelancer Login Successful!\nUser: ${data.user.fullName} (${data.user.userType})`;
                     document.getElementById('getApplicationsBtn').disabled = false;
                 } else {
                     result.className = 'result error';
@@ -218,13 +218,13 @@
             }
             
             btn.disabled = false;
-            btn.textContent = 'Login as Recruiter';
+            btn.textContent = 'Login as Freelancer';
         });
 
         // Get Recruiter Applications
         async function getRecruiterApplications() {
             if (!recruiterToken) {
-                alert('Please login as recruiter first!');
+                alert('Please login as freelancer first!');
                 return;
             }
 
