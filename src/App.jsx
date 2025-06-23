@@ -56,6 +56,13 @@ export default function App() {
     companyName: ''
   });
 
+  const [savedClientInfo, setSavedClientInfo] = useState(() => {
+    // Load from localStorage if available
+    const saved = localStorage.getItem('savedClientInfo');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showClientInfoList, setShowClientInfoList] = useState(false);
+
   // Load initial data and check authentication
   useEffect(() => {
     // Initialize dark mode and dashboard layout from localStorage
@@ -699,8 +706,13 @@ export default function App() {
               phone: form.phone.value,
               location: form.location.value,
               companyName: form.companyName?.value || '',
+              timestamp: new Date().toISOString(),
             };
             updateUserProfile(profileData);
+            // Save to list
+            const updatedList = [profileData, ...savedClientInfo];
+            setSavedClientInfo(updatedList);
+            localStorage.setItem('savedClientInfo', JSON.stringify(updatedList));
           }} className="space-y-6">
 
             {/* Client Information Section */}
@@ -770,17 +782,59 @@ export default function App() {
               >
                 {profileLoading ? 'Refreshing...' : 'Refresh Profile'}
               </button>
-              <button
-                type="submit"
-                disabled={profileLoading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition-colors"
-              >
-                {profileLoading ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowClientInfoList(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+                >
+                  View Saved Info
+                </button>
+                <button
+                  type="submit"
+                  disabled={profileLoading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition-colors"
+                >
+                  {profileLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </form>
         </div>
-
+        {/* Modal for Saved Client Info List */}
+        {showClientInfoList && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative">
+              <button
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowClientInfoList(false)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <h3 className="text-lg font-bold mb-4 text-gray-900">Saved Client Information</h3>
+              {savedClientInfo.length === 0 ? (
+                <div className="text-gray-500">No saved information yet.</div>
+              ) : (
+                <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                  {savedClientInfo.map((info, idx) => (
+                    <li key={idx} className="py-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div><span className="font-medium text-gray-700">Name:</span> {info.fullName}</div>
+                        <div><span className="font-medium text-gray-700">Email:</span> {info.email}</div>
+                        <div><span className="font-medium text-gray-700">Phone:</span> {info.phone}</div>
+                        <div><span className="font-medium text-gray-700">Location:</span> {info.location}</div>
+                        <div><span className="font-medium text-gray-700">Company:</span> {info.companyName}</div>
+                        <div><span className="font-medium text-gray-700">Saved:</span> {new Date(info.timestamp).toLocaleString()}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
         {/* Profile Preview Section */}
         {userProfile && (
           <div className="mt-6 bg-gray-50 rounded-lg shadow-md p-6 border border-gray-200">
@@ -1173,17 +1227,16 @@ export default function App() {
         <div className="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM8 14v.01M12 14v.01M16 14v.01" />
-          </svg>
-          <h3 className="mt-2 text-lg font-medium text-gray-900">No services posted yet</h3>
-          <p className="mt-1 text-gray-500">Get started by posting your first freelancing service.</p>
-          <div className="mt-6">
-            <button
-              onClick={() => setActiveTab('post-job')}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Post Your First Service
-            </button>
-          </div>
+        </svg>
+        <h3 className="mt-2 text-lg font-medium text-gray-900">No services posted yet</h3>
+        <p className="mt-1 text-gray-500">Get started by posting your first freelancing service.</p>
+        <div className="mt-6">
+          <button
+            onClick={() => setActiveTab('post-job')}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Post Your First Service
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
@@ -1662,8 +1715,9 @@ export default function App() {
                   minLength={!isLogin ? 6 : undefined}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-
                 />
+                {!
                 {!isLogin && formData.password && formData.password.length < 6 && (
                   <p className="mt-1 text-sm text-red-600">Password must be at least 6 characters long</p>
                 )}
