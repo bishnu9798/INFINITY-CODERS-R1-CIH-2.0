@@ -155,12 +155,14 @@ function App() {
     try {
       const response = await jobsAPI.getMyJobs();
       console.log('Recruiter jobs loaded:', response.data);
-      // Convert MongoDB _id to id for frontend compatibility
+      // Convert MongoDB _id to id for frontend compatibility, but keep original _id for backend operations
       const jobsWithId = response.data.map(job => ({
         ...job,
-        id: job._id,
+        id: job._id || job.id, // Use _id if available, fallback to id
+        _id: job._id, // Keep original _id for backend operations
         skills: typeof job.skills === 'string' ? job.skills.split(',').map(s => s.trim()) : job.skills || []
       }));
+      console.log('Jobs with ID mapping:', jobsWithId.map(job => ({ id: job.id, _id: job._id, title: job.title })));
       setRecruiterJobs(jobsWithId);
     } catch (error) {
       console.error('Error loading recruiter jobs:', error);
@@ -583,13 +585,26 @@ function App() {
     if (window.confirm(confirmMessage)) {
       try {
         setLoading(true);
-        await jobsAPI.delete(jobId);
+        console.log('Attempting to delete job with ID:', jobId);
+
+        // Find the job in recruiterJobs to get the correct _id
+        const jobToDelete = recruiterJobs.find(job => job.id === jobId || job._id === jobId);
+        const backendId = jobToDelete?._id || jobId;
+
+        console.log('Using backend ID for deletion:', backendId);
+        await jobsAPI.delete(backendId);
         alert("Service deleted successfully!");
         loadJobs();
         loadRecruiterJobs(); // Reload recruiter's jobs
       } catch (error) {
         console.error('Service deletion error:', error);
-        alert(error.response?.data?.error || 'Failed to delete service');
+        console.error('Error details:', error.response?.data);
+        // Show backend error message if available
+        if (error.response?.data?.error) {
+          alert(error.response.data.error);
+        } else {
+          alert('Failed to delete service. Make sure you are logged in as the owner of this service.');
+        }
       } finally {
         setLoading(false);
       }
