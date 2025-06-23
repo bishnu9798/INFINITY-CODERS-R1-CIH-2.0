@@ -103,7 +103,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 <span className="text-white font-bold text-sm">FM</span>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Freelancer-market-place 2025
+                FREELANCER MARKET PLACE
               </span>
             </div>
             <div className="flex items-center space-x-4">
@@ -111,13 +111,13 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 onClick={onLogin}
                 className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                Sign In
+                SIGN IN
               </button>
               <button
                 onClick={onGetStarted}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105"
               >
-                Get Started
+                GET STARTED
               </button>
             </div>
           </div>
@@ -145,13 +145,13 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 onClick={onGetStarted}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all duration-300 transform hover:scale-105 min-w-[200px]"
               >
-                Start Your Journey
+                START YOUR JOURNEY
               </button>
               <button
                 onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
                 className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold hover:border-blue-600 hover:text-blue-600 transition-all duration-300 min-w-[200px]"
               >
-                Learn More
+                LEARN MORE
               </button>
             </div>
           </div>
@@ -164,7 +164,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
       </section>
 
       {/* Social Proof Section */}
-      <SocialProof />
+      <SocialProof headline="CONNECTING CLIENTS IN NEED TO FREELANCERS WHO DELIVER" />
 
       {/* Stats Section */}
       <section className="py-16 bg-white/50">
@@ -193,7 +193,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Why Choose Our Platform?
+                WHY CHOOSE OUR PLATFORM?
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -220,7 +220,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                How It Works
+                HOW IT WORKS ?
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -233,27 +233,27 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
               <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
                 1
               </div>
-              <h3 className="text-2xl font-bold mb-4">Create Your Profile</h3>
+              <h3 className="text-2xl font-bold mb-4">CREATE YOUR PROFILE</h3>
               <p className="text-gray-600">
-                Sign up and build your professional profile with skills, experience, and portfolio
+                Register and browse talent profiles, explore projects, or even book a consultation.
               </p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
                 2
               </div>
-              <h3 className="text-2xl font-bold mb-4">Connect & Collaborate</h3>
+              <h3 className="text-2xl font-bold mb-4">POST A JOB AND HIRE A TOP TALENT</h3>
               <p className="text-gray-600">
-                Find opportunities, connect with clients, and start working on exciting projects
+                Finding talent doesn’t have to be a chore. Post a job or we can search for you!
               </p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-gradient-to-r from-pink-600 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
                 3
               </div>
-              <h3 className="text-2xl font-bold mb-4">Get Paid Securely</h3>
+              <h3 className="text-2xl font-bold mb-4">WORK WITH THE BEST—WITHOUT BREKING THE BLANK</h3>
               <p className="text-gray-600">
-                Complete projects and receive payments through our secure, integrated payment system
+                Freelancer market place makes it affordable to up your work and take advantage of low transaction rates.
               </p>
             </div>
           </div>
@@ -269,7 +269,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                What Our Users Say
+                WHAT OUR USERS SAY
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -324,217 +324,6 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                Simple, Transparent Pricing
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Choose the plan that works best for you. No hidden fees, no surprises.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Plan */}
-            <div className="bg-gray-50 rounded-2xl p-8 border-2 border-gray-200">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Job Seeker</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-2">Free</div>
-                <p className="text-gray-600 mb-6">Perfect for job seekers</p>
-                <ul className="text-left space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Unlimited job applications
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Resume upload & storage
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Job alerts & notifications
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Basic profile features
-                  </li>
-                </ul>
-                <button
-                  onClick={onGetStarted}
-                  className="w-full bg-gray-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-                >
-                  Get Started Free
-                </button>
-              </div>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border-2 border-blue-200 relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Most Popular
-                </span>
-              </div>
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Recruiter Basic</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-2">$99</div>
-                <p className="text-gray-600 mb-6">per month</p>
-                <ul className="text-left space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Post up to 10 jobs/month
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Access to candidate database
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Basic analytics & insights
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Email support
-                  </li>
-                </ul>
-                <button
-                  onClick={onGetStarted}
-                  className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Start Free Trial
-                </button>
-              </div>
-            </div>
-
-            {/* Enterprise Plan */}
-            <div className="bg-gray-50 rounded-2xl p-8 border-2 border-gray-200">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Enterprise</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-2">$299</div>
-                <p className="text-gray-600 mb-6">per month</p>
-                <ul className="text-left space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Unlimited job postings
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Advanced analytics
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Priority support
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Custom integrations
-                  </li>
-                </ul>
-                <button
-                  onClick={onGetStarted}
-                  className="w-full bg-gray-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-                >
-                  Contact Sales
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Transform Your Career?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Join our community today and start connecting, collaborating, and earning like never before.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button
-              onClick={onGetStarted}
-              className="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all duration-300 transform hover:scale-105 min-w-[200px]"
-            >
-              Get Started Free
-            </button>
-            <button
-              onClick={onLogin}
-              className="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 min-w-[200px]"
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Frequently Asked Questions
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600">
-              Everything you need to know about our platform
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                How does the payment system work?
-              </h3>
-              <p className="text-gray-600">
-                Our secure payment system uses escrow protection for all transactions. Payments are held safely until project milestones are completed, ensuring both parties are protected.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Is it really free for job seekers?
-              </h3>
-              <p className="text-gray-600">
-                Yes! Job seekers can create profiles, apply to jobs, and use all core features completely free. We only charge recruiters and companies for posting jobs and accessing premium features.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                How do you ensure quality matches?
-              </h3>
-              <p className="text-gray-600">
-                Our AI-powered matching algorithm analyzes skills, experience, location preferences, and company culture to suggest the best matches for both job seekers and employers.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Can I cancel my subscription anytime?
-              </h3>
-              <p className="text-gray-600">
-                Absolutely! You can cancel your subscription at any time. There are no long-term contracts or cancellation fees. Your account will remain active until the end of your current billing period.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                What kind of support do you provide?
-              </h3>
-              <p className="text-gray-600">
-                We offer email support for all users, with priority support for premium subscribers. Our help center contains detailed guides, and enterprise customers get dedicated account management.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Newsletter Section */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -551,7 +340,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">FM</span>
                 </div>
-                <span className="text-xl font-bold">Freelancer-market-place 2025</span>
+                <span className="text-xl font-bold">FREELANCER MARKET PLACE</span>
               </div>
               <p className="text-gray-400">
                 Connecting talent with opportunity through innovation and technology.

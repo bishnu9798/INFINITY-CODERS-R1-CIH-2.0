@@ -1778,7 +1778,7 @@ export default function App() {
             {/* Logo and Brand */}
             <div className="flex items-center">
               <h1 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mr-8`}>
-                🚀 Freelancer-market-place
+                FREELANCER MARKET PLACE
               </h1>
 
               {/* Dark Mode Toggle */}
