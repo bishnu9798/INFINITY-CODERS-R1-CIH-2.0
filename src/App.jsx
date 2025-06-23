@@ -3,10 +3,6 @@ import { authAPI, jobsAPI, applicationsAPI, usersAPI } from './services/api-mock
 import LandingPage from './components/LandingPage';
 import AdvancedJobSearch from './components/AdvancedJobSearch';
 import EnhancedJobCard from './components/EnhancedJobCard';
-import AssessmentSystem from './components/AssessmentSystem';
-import SmartAutomation from './components/SmartAutomation';
-import InterviewWorkflow from './components/InterviewWorkflow';
-import AnalyticsInsights from './components/AnalyticsInsights';
 import { filterJobs, sortJobsByRelevance, getFilterSummary } from './utils/jobFilters';
 import './enhanced-styles.css';
 
@@ -56,9 +52,16 @@ export default function App() {
     email: '',
     password: '',
     fullName: '',
-    userType: 'jobseeker',
+    userType: 'jobseeker', // 'jobseeker' = Client, 'recruiter' = Freelancer
     companyName: ''
   });
+
+  const [savedClientInfo, setSavedClientInfo] = useState(() => {
+    // Load from localStorage if available
+    const saved = localStorage.getItem('savedClientInfo');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showClientInfoList, setShowClientInfoList] = useState(false);
 
   // Load initial data and check authentication
   useEffect(() => {
@@ -682,9 +685,10 @@ export default function App() {
       );
     }
 
+    // Only show client (jobseeker) fields
     return (
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
+        <h2 className="text-2xl font-bold mb-6">PROFILE</h2>
 
         {profileError && (
           <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -701,21 +705,19 @@ export default function App() {
               email: form.email.value,
               phone: form.phone.value,
               location: form.location.value,
-              skills: form.skills.value,
-              experienceLevel: form.experienceLevel.value,
-              bio: form.bio.value,
-              linkedinUrl: form.linkedinUrl?.value || '',
-              githubUrl: form.githubUrl?.value || '',
-              portfolioUrl: form.portfolioUrl?.value || '',
-              expectedSalary: form.expectedSalary?.value || '',
-              availability: form.availability?.value || 'immediately'
+              companyName: form.companyName?.value || '',
+              timestamp: new Date().toISOString(),
             };
             updateUserProfile(profileData);
+            // Save to list
+            const updatedList = [profileData, ...savedClientInfo];
+            setSavedClientInfo(updatedList);
+            localStorage.setItem('savedClientInfo', JSON.stringify(updatedList));
           }} className="space-y-6">
 
-            {/* Basic Information Section */}
+            {/* Client Information Section */}
             <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Client Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
@@ -757,118 +759,16 @@ export default function App() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* Professional Information Section */}
-            <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Information</h3>
-              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
                   <input
                     type="text"
-                    name="skills"
-                    defaultValue={userProfile?.skills || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., JavaScript, React, Node.js, Python, SQL"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Separate skills with commas</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
-                    <select
-                      name="experienceLevel"
-                      defaultValue={userProfile?.experience_level || 'entry'}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="entry">Entry Level</option>
-                      <option value="1-2">1-2 years</option>
-                      <option value="2-4">2-4 years</option>
-                      <option value="4-6">4-6 years</option>
-                      <option value="6+">6+ years</option>
-                      <option value="senior">Senior Level</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Expected Salary</label>
-                    <input
-                      type="text"
-                      name="expectedSalary"
-                      defaultValue={userProfile?.expected_salary || ''}
-                      placeholder="e.g., $60,000 - $80,000"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Availability</label>
-                  <select
-                    name="availability"
-                    defaultValue={userProfile?.availability || 'immediately'}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="immediately">Available Immediately</option>
-                    <option value="2weeks">2 weeks notice</option>
-                    <option value="1month">1 month notice</option>
-                    <option value="2months">2 months notice</option>
-                    <option value="3months">3+ months</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Links Section */}
-            <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Links</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
-                  <input
-                    type="url"
-                    name="linkedinUrl"
-                    defaultValue={userProfile?.linkedin_url || ''}
-                    placeholder="https://linkedin.com/in/yourprofile"
+                    name="companyName"
+                    defaultValue={userProfile?.company_name || user?.companyName || ''}
+                    placeholder="Your company (optional)"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">GitHub URL</label>
-                  <input
-                    type="url"
-                    name="githubUrl"
-                    defaultValue={userProfile?.github_url || ''}
-                    placeholder="https://github.com/yourusername"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Portfolio URL</label>
-                  <input
-                    type="url"
-                    name="portfolioUrl"
-                    defaultValue={userProfile?.portfolio_url || ''}
-                    placeholder="https://yourportfolio.com"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Bio Section */}
-            <div className="pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">About You</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Professional Bio</label>
-                <textarea
-                  name="bio"
-                  defaultValue={userProfile?.bio || ''}
-                  rows="6"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Tell us about yourself, your experience, and what you're looking for in your next role..."
-                ></textarea>
-                <p className="text-xs text-gray-500 mt-1">This will be visible to recruiters when you apply for jobs</p>
               </div>
             </div>
 
@@ -882,17 +782,59 @@ export default function App() {
               >
                 {profileLoading ? 'Refreshing...' : 'Refresh Profile'}
               </button>
-              <button
-                type="submit"
-                disabled={profileLoading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition-colors"
-              >
-                {profileLoading ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowClientInfoList(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+                >
+                  View Saved Info
+                </button>
+                <button
+                  type="submit"
+                  disabled={profileLoading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition-colors"
+                >
+                  {profileLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </form>
         </div>
-
+        {/* Modal for Saved Client Info List */}
+        {showClientInfoList && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative">
+              <button
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowClientInfoList(false)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <h3 className="text-lg font-bold mb-4 text-gray-900">Saved Client Information</h3>
+              {savedClientInfo.length === 0 ? (
+                <div className="text-gray-500">No saved information yet.</div>
+              ) : (
+                <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                  {savedClientInfo.map((info, idx) => (
+                    <li key={idx} className="py-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div><span className="font-medium text-gray-700">Name:</span> {info.fullName}</div>
+                        <div><span className="font-medium text-gray-700">Email:</span> {info.email}</div>
+                        <div><span className="font-medium text-gray-700">Phone:</span> {info.phone}</div>
+                        <div><span className="font-medium text-gray-700">Location:</span> {info.location}</div>
+                        <div><span className="font-medium text-gray-700">Company:</span> {info.companyName}</div>
+                        <div><span className="font-medium text-gray-700">Saved:</span> {new Date(info.timestamp).toLocaleString()}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
         {/* Profile Preview Section */}
         {userProfile && (
           <div className="mt-6 bg-gray-50 rounded-lg shadow-md p-6 border border-gray-200">
@@ -911,51 +853,8 @@ export default function App() {
                 <span className="font-medium text-gray-700">Location:</span> {userProfile.location || 'Not set'}
               </div>
               <div>
-                <span className="font-medium text-gray-700">Experience:</span> {userProfile.experience_level || 'Not set'}
+                <span className="font-medium text-gray-700">Company:</span> {userProfile.company_name || 'Not set'}
               </div>
-              <div>
-                <span className="font-medium text-gray-700">Availability:</span> {userProfile.availability || 'Not set'}
-              </div>
-              {userProfile.skills && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Skills:</span> {userProfile.skills}
-                </div>
-              )}
-              {userProfile.expected_salary && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Expected Salary:</span> {userProfile.expected_salary}
-                </div>
-              )}
-              {userProfile.linkedin_url && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">LinkedIn:</span>
-                  <a href={userProfile.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                    {userProfile.linkedin_url}
-                  </a>
-                </div>
-              )}
-              {userProfile.github_url && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">GitHub:</span>
-                  <a href={userProfile.github_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                    {userProfile.github_url}
-                  </a>
-                </div>
-              )}
-              {userProfile.portfolio_url && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Portfolio:</span>
-                  <a href={userProfile.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                    {userProfile.portfolio_url}
-                  </a>
-                </div>
-              )}
-              {userProfile.bio && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Bio:</span>
-                  <p className="mt-1 text-gray-600">{userProfile.bio}</p>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -1162,73 +1061,73 @@ export default function App() {
     console.log('Rendering resume upload tab');
     return (
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Upload Your Resume</h2>
-      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 max-w-2xl mx-auto">
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Upload Resume (PDF or DOCX)</label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="flex text-sm text-gray-600 justify-center">
-                <label htmlFor="resume-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                  <span>Upload a file</span>
-                  <input
-                    id="resume-upload"
-                    name="resume"
-                    type="file"
-                    className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        if (file.size > 10 * 1024 * 1024) {
-                          alert('File size must be less than 10MB.');
-                          e.target.value = '';
-                          return;
+        <h2 className="text-2xl font-bold mb-6">Upload Resume/CV</h2>
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 max-w-2xl mx-auto">
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Upload Resume/CV</label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div className="space-y-1 text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div className="flex text-sm text-gray-600 justify-center">
+                  <label htmlFor="resume-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                    <span>Upload a file</span>
+                    <input
+                      id="resume-upload"
+                      name="resume"
+                      type="file"
+                      className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          if (file.size > 10 * 1024 * 1024) {
+                            alert('File size must be less than 10MB.');
+                            e.target.value = '';
+                            return;
+                          }
+                          setResume(file);
                         }
-                        setResume(file);
-                      }
-                    }}
-                  />
-                </label>
-                <p className="pl-1">or drag and drop</p>
+                      }}
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
+                <p className="text-xs text-gray-500">Any file type up to 10MB</p>
+                {resume && (
+                  <p className="file-info text-sm text-green-600">Selected: {resume.name}</p>
+                )}
               </div>
-              <p className="text-xs text-gray-500">Any file type up to 10MB</p>
-              {resume && (
-                <p className="file-info text-sm text-green-600">Selected: {resume.name}</p>
-              )}
             </div>
           </div>
-        </div>
-        {resume && (
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <svg className="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <div>
-                  <span className="font-medium text-green-800">{resume.name}</span>
-                  <div className="text-sm text-green-600">
-                    Size: {(resume.size / 1024).toFixed(2)} KB | Type: {resume.type}
+          {resume && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <svg className="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div>
+                    <span className="font-medium text-green-800">{resume.name}</span>
+                    <div className="text-sm text-green-600">
+                      Size: {(resume.size / 1024).toFixed(2)} KB | Type: {resume.type}
+                    </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => setResume(null)}
+                  className="text-red-600 hover:text-red-800 text-sm"
+                >
+                  Remove
+                </button>
               </div>
-              <button
-                onClick={() => setResume(null)}
-                className="text-red-600 hover:text-red-800 text-sm"
-              >
-                Remove
-              </button>
+              <div className="mt-2 text-sm text-green-700">
+                ✅ Resume ready for job applications
+              </div>
             </div>
-            <div className="mt-2 text-sm text-green-700">
-              ✅ Resume ready for job applications
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
     );
   };
 
@@ -1400,17 +1299,16 @@ export default function App() {
         <div className="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM8 14v.01M12 14v.01M16 14v.01" />
-          </svg>
-          <h3 className="mt-2 text-lg font-medium text-gray-900">No services posted yet</h3>
-          <p className="mt-1 text-gray-500">Get started by posting your first freelancing service.</p>
-          <div className="mt-6">
-            <button
-              onClick={() => setActiveTab('post-job')}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Post Your First Service
-            </button>
-          </div>
+        </svg>
+        <h3 className="mt-2 text-lg font-medium text-gray-900">No services posted yet</h3>
+        <p className="mt-1 text-gray-500">Get started by posting your first freelancing service.</p>
+        <div className="mt-6">
+          <button
+            onClick={() => setActiveTab('post-job')}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Post Your First Service
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
@@ -1678,7 +1576,7 @@ export default function App() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied Date</th>
@@ -1772,7 +1670,7 @@ export default function App() {
         return;
       }
       if (formData.userType === 'recruiter' && !formData.companyName.trim()) {
-        setError('Company name is required for recruiters');
+        setError('Business/Company name is required for freelancers');
         return;
       }
     } else {
@@ -1886,8 +1784,9 @@ export default function App() {
                   minLength={!isLogin ? 6 : undefined}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-
                 />
+                {!
                 {!isLogin && formData.password && formData.password.length < 6 && (
                   <p className="mt-1 text-sm text-red-600">Password must be at least 6 characters long</p>
                 )}
@@ -1909,7 +1808,7 @@ export default function App() {
                   </div>
                   {formData.userType === 'recruiter' && (
                     <div>
-                      <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">Company Name</label>
+                      <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">Business/Company Name</label>
                       <input
                         id="companyName"
                         name="companyName"
@@ -1998,7 +1897,7 @@ export default function App() {
                               : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                         >
-                          Profile
+                          PROFILE
                         </button>
                         <button
                           onClick={() => setActiveTab('jobs')}
@@ -2029,56 +1928,6 @@ export default function App() {
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                         >
                           Applications
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('resume')}
-                          className={`${
-                            activeTab === 'resume'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Resume
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('assessments')}
-                          className={`${
-                            activeTab === 'assessments'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Assessments
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('automation')}
-                          className={`${
-                            activeTab === 'automation'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          AI Automation
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('interviews')}
-                          className={`${
-                            activeTab === 'interviews'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Interviews
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('analytics')}
-                          className={`${
-                            activeTab === 'analytics'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Analytics
                         </button>
                       </>
                     )}
@@ -2321,11 +2170,6 @@ export default function App() {
         {activeTab === 'jobs' && renderJobs()}
         {activeTab === 'saved-jobs' && renderSavedJobs()}
         {activeTab === 'applications' && renderApplications()}
-        {activeTab === 'resume' && renderResumeUpload()}
-        {activeTab === 'assessments' && <AssessmentSystem darkMode={darkMode} user={user} onUpdateProfile={updateUserProfile} />}
-        {activeTab === 'automation' && <SmartAutomation darkMode={darkMode} user={user} jobs={jobs} applications={applications} />}
-        {activeTab === 'interviews' && <InterviewWorkflow darkMode={darkMode} user={user} applications={applications} jobs={jobs} />}
-        {activeTab === 'analytics' && <AnalyticsInsights darkMode={darkMode} user={user} jobs={jobs} applications={applications} />}
         {activeTab === 'notifications' && renderNotifications()}
         {activeTab === 'recruiter-jobs' && renderRecruiterJobs()}
         {activeTab === 'post-job' && renderPostJob()}
