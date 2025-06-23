@@ -17,45 +17,45 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
   const features = [
     {
       icon: "🤝",
-      title: "Connect",
+      title: "CONNECT",
       description: "Bridge the gap between talented professionals and innovative companies",
       details: "Our platform connects job seekers with recruiters through intelligent matching algorithms"
     },
     {
       icon: "🚀",
-      title: "Collaborate",
+      title: "HIRE BEST FREELANCERS",
       description: "Work together seamlessly with integrated collaboration tools",
       details: "Built-in messaging, video interviews, and project collaboration features"
     },
     {
       icon: "💳",
-      title: "Pay",
-      description: "Secure, transparent payment processing for freelance and contract work",
-      details: "Integrated payment system with escrow protection and milestone-based payments"
+      title: "CHATBOT SUPPORT",
+      description: " AI-powered Chatbot Support offers 24/7 instant assistance for freelancers and clients, handling FAQs.",
+      details: "Seamlessly escalates complex issues to human agents,a consistently smooth user experience."
     }
   ];
 
   const testimonials = [
     {
-      name: "Sarah Johnson",
-      role: "Software Engineer",
-      company: "TechCorp",
+      name: "SARAH JOHNSON",
+      role: "Video Editor",
+      company: "OMS Pics",
       image: "👩‍💻",
-      quote: "Found my dream job in just 2 weeks! The platform's matching algorithm is incredible."
+      quote: "Found 25+ Clients in just 2 weeks! The platform's matching algorithm is incredible."
     },
     {
-      name: "Michael Chen",
-      role: "HR Director",
+      name: "MICHAEL CHEN",
+      role: "HR ",
       company: "InnovateLab",
       image: "👨‍💼",
       quote: "We've hired 15+ amazing developers through this platform. The quality is outstanding."
     },
     {
-      name: "Emily Rodriguez",
+      name: "EMILY RODRI",
       role: "Freelance Designer",
       company: "Creative Studio",
       image: "👩‍🎨",
-      quote: "The payment system is so smooth. I get paid on time, every time."
+      quote: "Got 20+ customers. I turn ideas into clean, functional visuals that connect and convert."
     }
   ];
 
@@ -130,23 +130,15 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Connect.
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent">
-                Collaborate.
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-pink-600 via-red-600 to-orange-600 bg-clip-text text-transparent">
-                Get Paid.
+                HIRE THE BEST FREELANCER FOR ANY JOB, ONLINE.
               </span>
             </h1>
             <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-              The future of work is here. Join thousands of professionals who are building their careers
-              through meaningful connections, seamless collaboration, and secure payments.
+              Welcome to the future of freelancing—where talented professionals and visionary clients connect, collaborate effortlessly, and transact securely.
+              Build your career or grow your business on a platform designed for trust, innovation, and global success in the modern work era.
             </p>
             <div className="text-lg text-blue-600 font-medium mb-8">
-              Perfect for: <TypingAnimation words={['Software Developers', 'Designers', 'Project Managers', 'Data Scientists', 'Marketing Experts', 'Freelancers']} />
+              Perfect for: <TypingAnimation words={['Software Developers', 'Designers', 'Project Managers', 'Clients', 'Marketing Experts', 'Freelancers']} />
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
