@@ -66,13 +66,28 @@ const initializeSampleData = () => {
     const sampleUsers = [
       {
         id: 'user_1',
+        email: 'manish1@gmail.com',
+        password: '123456',
+        fullName: 'Manish Kumar',
+        userType: 'jobseeker'
+      },
+      {
+        id: 'user_2',
+        email: 'manishmodi0408@gmail.com',
+        password: '987654',
+        fullName: 'Manish Modi',
+        userType: 'recruiter',
+        companyName: 'The Tech World'
+      },
+      {
+        id: 'user_3',
         email: 'jobseeker@example.com',
         password: 'password123',
         fullName: 'John Doe',
         userType: 'jobseeker'
       },
       {
-        id: 'user_2',
+        id: 'user_4',
         email: 'recruiter@example.com',
         password: 'password123',
         fullName: 'Jane Smith',
@@ -119,14 +134,88 @@ const initializeSampleData = () => {
 // Initialize sample data
 initializeSampleData();
 
-// Auth API with real backend implementation
+// Auth API with mock implementation
 export const authAPI = {
   login: async (email, password) => {
-    return api.post('/auth/login', { email, password });
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const users = getStoredData(STORAGE_KEYS.USERS);
+        const user = users.find(u => u.email === email && u.password === password);
+
+        if (user) {
+          const token = `mock-token-${Date.now()}`;
+          resolve({
+            data: {
+              message: 'Login successful',
+              token,
+              user: {
+                id: user.id,
+                _id: user.id, // For MongoDB compatibility
+                email: user.email,
+                userType: user.userType,
+                fullName: user.fullName,
+                companyName: user.companyName
+              }
+            }
+          });
+        } else {
+          reject({
+            response: {
+              data: { error: 'Invalid credentials' }
+            }
+          });
+        }
+      }, 500);
+    });
   },
 
   register: async (userData) => {
-    return api.post('/auth/register', userData);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const users = getStoredData(STORAGE_KEYS.USERS);
+
+        // Check if user already exists
+        const existingUser = users.find(u => u.email === userData.email);
+        if (existingUser) {
+          reject({
+            response: {
+              data: { error: 'User already exists with this email' }
+            }
+          });
+          return;
+        }
+
+        // Create new user
+        const newUser = {
+          id: generateId(),
+          email: userData.email,
+          password: userData.password,
+          userType: userData.userType,
+          fullName: userData.fullName,
+          companyName: userData.companyName || null,
+          created_at: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        setStoredData(STORAGE_KEYS.USERS, users);
+
+        const token = `mock-token-${Date.now()}`;
+        resolve({
+          data: {
+            message: 'User created successfully',
+            token,
+            user: {
+              id: newUser.id,
+              _id: newUser.id, // For MongoDB compatibility
+              email: newUser.email,
+              userType: newUser.userType,
+              fullName: newUser.fullName,
+              companyName: newUser.companyName
+            }
+          }
+        });
+      }, 500);
+    });
   }
 };
 
