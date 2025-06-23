@@ -6,7 +6,7 @@ import EnhancedJobCard from './components/EnhancedJobCard';
 import { filterJobs, sortJobsByRelevance, getFilterSummary } from './utils/jobFilters';
 import './enhanced-styles.css';
 
-export default function App() {
+function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -520,7 +520,7 @@ export default function App() {
       description: form.description.value,
       salaryRange: form.salaryRange?.value || '',
       jobType: form.jobType?.value || 'hourly',
-      serviceType: 'freelancing', // Mark this as a freelancing service
+      serviceType: 'freelancing',
       resumeFile: form.resume?.files[0] || null
     };
 
@@ -1015,7 +1015,7 @@ export default function App() {
 
   const renderApplications = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">My Applications</h2>
+      <h2 className="text-2xl font-bold mb-6">MY APPLICATIONS</h2>
       {applications.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1225,18 +1225,17 @@ export default function App() {
 
       {recruiterJobs.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM8 14v.01M12 14v.01M16 14v.01" />
-        </svg>
-        <h3 className="mt-2 text-lg font-medium text-gray-900">No services posted yet</h3>
-        <p className="mt-1 text-gray-500">Get started by posting your first freelancing service.</p>
-        <div className="mt-6">
-          <button
-            onClick={() => setActiveTab('post-job')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Post Your First Service
-          </button>
+          <div className="mx-auto h-12 w-12 text-gray-400 mb-4">📄</div>
+          <h3 className="mt-2 text-lg font-medium text-gray-900">No services posted yet</h3>
+          <p className="mt-1 text-gray-500">Get started by posting your first freelancing service.</p>
+          <div className="mt-6">
+            <button
+              onClick={() => setActiveTab('post-job')}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Post Your First Service
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
@@ -1261,7 +1260,7 @@ export default function App() {
                 Posted: {new Date(job.created_at).toLocaleDateString()}
               </p>
               <div className="mt-3 mb-4">
-                {(Array.isArray(job.skills) ? job.skills : job.skills?.split(',') || []).map((skill, index) => (
+                {(Array.isArray(job.skills) ? job.skills : (job.skills ? job.skills.split(',') : [])).map((skill, index) => (
                   <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2 mb-2">
                     {skill.trim()}
                   </span>
@@ -1391,9 +1390,7 @@ export default function App() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Upload Resume/CV</label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
               <div className="space-y-1 text-center">
-                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <div className="mx-auto h-12 w-12 text-gray-400 text-4xl flex items-center justify-center">📎</div>
                 <div className="flex text-sm text-gray-600">
                   <label htmlFor="resume-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                     <span>Upload your resume</span>
@@ -1650,7 +1647,6 @@ export default function App() {
   };
 
   const renderLoginPage = () => {
-
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -1715,9 +1711,8 @@ export default function App() {
                   minLength={!isLogin ? 6 : undefined}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="mt-
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
-                {!
                 {!isLogin && formData.password && formData.password.length < 6 && (
                   <p className="mt-1 text-sm text-red-600">Password must be at least 6 characters long</p>
                 )}
@@ -1833,7 +1828,7 @@ export default function App() {
                         <button
                           onClick={() => setActiveTab('jobs')}
                           className={`${
-                            activeTab === 'jobs'
+                            activeTab === 'Jobs'
                               ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
                               : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
@@ -2110,3 +2105,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
