@@ -489,28 +489,64 @@ export default function App() {
   const handlePostJob = async (e) => {
     e.preventDefault();
     const form = e.target;
-    const jobData = {
+
+    // Validate mobile number format
+    const mobileValue = form.mobile.value;
+    const mobileRegex = /^[+]?[\d\s\-\(\)]{10,}$/;
+    if (!mobileRegex.test(mobileValue)) {
+      alert('Please enter a valid mobile number (at least 10 digits)');
+      return;
+    }
+
+    // Validate email format
+    const emailValue = form.email.value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    const serviceData = {
       title: form.title.value,
+      mobile: mobileValue,
+      email: emailValue,
       company: form.company.value,
       location: form.location.value,
       experience: form.experience.value,
       skills: form.skills.value.split(',').map(skill => skill.trim()),
       description: form.description.value,
       salaryRange: form.salaryRange?.value || '',
-      jobType: form.jobType?.value || 'full-time'
+      jobType: form.jobType?.value || 'hourly',
+      serviceType: 'freelancing', // Mark this as a freelancing service
+      resumeFile: form.resume?.files[0] || null
     };
 
     try {
       setLoading(true);
-      await jobsAPI.create(jobData);
+
+      // If there's a resume file, we could handle file upload here
+      // For now, we'll just include the file info in the service data
+      if (serviceData.resumeFile) {
+        serviceData.resumeFileName = serviceData.resumeFile.name;
+        serviceData.resumeFileSize = serviceData.resumeFile.size;
+        // In a real implementation, you'd upload the file to a server
+        console.log('Resume file selected:', serviceData.resumeFile);
+      }
+
+      await jobsAPI.create(serviceData);
       form.reset();
-      alert("Job posted successfully!");
+      // Clear file info display
+      const fileInfo = form.querySelector('.file-info');
+      if (fileInfo) {
+        fileInfo.textContent = '';
+      }
+      alert("Freelancing service posted successfully!");
       loadJobs(); // Reload jobs
       loadRecruiterJobs(); // Reload recruiter's jobs
       setActiveTab('recruiter-jobs');
     } catch (error) {
-      console.error('Job posting error:', error);
-      alert(error.response?.data?.error || 'Failed to post job');
+      console.error('Service posting error:', error);
+      alert(error.response?.data?.error || 'Failed to post freelancing service');
     } finally {
       setLoading(false);
     }
@@ -539,18 +575,18 @@ export default function App() {
   };
 
   const handleDeleteJob = async (jobId, jobTitle) => {
-    const confirmMessage = `Are you sure you want to delete the job "${jobTitle}"?\n\nThis action cannot be undone and will also delete all applications for this job.`;
+    const confirmMessage = `Are you sure you want to delete the service "${jobTitle}"?\n\nThis action cannot be undone and will also delete all applications for this service.`;
 
     if (window.confirm(confirmMessage)) {
       try {
         setLoading(true);
         await jobsAPI.delete(jobId);
-        alert("Job deleted successfully!");
+        alert("Service deleted successfully!");
         loadJobs();
         loadRecruiterJobs(); // Reload recruiter's jobs
       } catch (error) {
-        console.error('Job deletion error:', error);
-        alert(error.response?.data?.error || 'Failed to delete job');
+        console.error('Service deletion error:', error);
+        alert(error.response?.data?.error || 'Failed to delete service');
       } finally {
         setLoading(false);
       }
@@ -582,7 +618,7 @@ export default function App() {
   // Render components remain unchanged — only backend logic was added
   const renderDashboard = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Welcome to Job Portal</h2>
+      <h2 className="text-2xl font-bold mb-6">WELCOME TO FREELANCER MARKET PLACE</h2>
       <div className="mb-8">
         <h3 className="text-xl font-semibold mb-4">Featured Jobs</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -616,7 +652,7 @@ export default function App() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteJob(job.id)}
+                    onClick={() => handleDeleteJob(job.id, job.title)}
                     disabled={loading}
                     className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md transition-colors"
                   >
@@ -1133,7 +1169,7 @@ export default function App() {
           <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
             <div className="space-y-1 text-center">
               <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <div className="flex text-sm text-gray-600">
                 <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
@@ -1324,20 +1360,20 @@ export default function App() {
 
   const renderRecruiterJobs = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Your Job Postings</h2>
+      <h2 className="text-2xl font-bold mb-6">YOUR FREELANCING SERVICE</h2>
       <div className="mb-6 flex justify-between items-center">
         <button
           onClick={() => setActiveTab('post-job')}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
         >
-          Post New Job
+          Post New Service
         </button>
         <button
           onClick={loadRecruiterJobs}
           disabled={loading}
           className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md transition-colors"
         >
-          {loading ? 'Refreshing...' : 'Refresh Jobs'}
+          {loading ? 'Refreshing...' : 'Refresh Services'}
         </button>
       </div>
 
@@ -1346,14 +1382,14 @@ export default function App() {
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM8 14v.01M12 14v.01M16 14v.01" />
           </svg>
-          <h3 className="mt-2 text-lg font-medium text-gray-900">No jobs posted yet</h3>
-          <p className="mt-1 text-gray-500">Get started by posting your first job.</p>
+          <h3 className="mt-2 text-lg font-medium text-gray-900">No services posted yet</h3>
+          <p className="mt-1 text-gray-500">Get started by posting your first freelancing service.</p>
           <div className="mt-6">
             <button
               onClick={() => setActiveTab('post-job')}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
             >
-              Post Your First Job
+              Post Your First Service
             </button>
           </div>
         </div>
@@ -1361,35 +1397,24 @@ export default function App() {
         <div className="grid grid-cols-1 gap-6">
           {recruiterJobs.map(job => (
             <div key={job.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <h4 className="text-xl font-bold text-blue-600">{job.title}</h4>
-                  <p className="text-gray-700 font-medium">{job.company}</p>
-                  <p className="text-sm text-gray-500">{job.location} | {job.experience}</p>
-                  {job.salary_range && (
-                    <p className="text-sm text-green-600 font-medium">💰 {job.salary_range}</p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-1">
-                    Posted: {new Date(job.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEditJobClick(job)}
-                    disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-3 py-1 rounded-md transition-colors text-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteJob(job.id, job.title)}
-                    disabled={loading}
-                    className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-3 py-1 rounded-md transition-colors text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
+              <div className="flex justify-between items-start mb-4">
+                <h4 className="text-xl font-bold text-blue-600">{job.title}</h4>
+                <button
+                  onClick={() => handleDeleteJob(job.id, job.title)}
+                  disabled={loading}
+                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-3 py-1 rounded-md transition-colors"
+                >
+                  Delete
+                </button>
               </div>
+              <p className="text-gray-700 font-medium">{job.company}</p>
+              <p className="text-sm text-gray-500">{job.location} | {job.experience}</p>
+              {job.salary_range && (
+                <p className="text-sm text-green-600 font-medium">💰 {job.salary_range}</p>
+              )}
+              <p className="text-xs text-gray-400 mt-1">
+                Posted: {new Date(job.created_at).toLocaleDateString()}
+              </p>
               <div className="mt-3 mb-4">
                 {(Array.isArray(job.skills) ? job.skills : job.skills?.split(',') || []).map((skill, index) => (
                   <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2 mb-2">
@@ -1418,51 +1443,163 @@ export default function App() {
 
   const renderPostJob = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Post a New Job</h2>
+      <h2 className="text-2xl font-bold mb-6">POST A NEW FREELANCING SERVICE</h2>
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 max-w-2xl mx-auto">
         <form onSubmit={handlePostJob} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
-            <input type="text" name="title" required className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service Title</label>
+            <input
+              type="text"
+              name="title"
+              required
+              placeholder="e.g., Professional Web Development Services"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* New Mobile Number Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+            <input
+              type="tel"
+              name="mobile"
+              required
+              placeholder="e.g., +1 (555) 123-4567"
+              pattern="[+]?[0-9\s\-\(\)]+"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* New Email Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="e.g., your.email@example.com"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Freelancer/Company Name</label>
+            <input
+              type="text"
+              name="company"
+              required
+              placeholder="e.g., Your Name or Company Name"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-            <input type="text" name="company" required className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service Location</label>
+            <input
+              type="text"
+              name="location"
+              required
+              placeholder="e.g., Remote, New York, NY, or Worldwide"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <input type="text" name="location" required className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Experience Required</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
             <select name="experience" required className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">Select experience level</option>
-              <option value="Entry Level">Entry Level</option>
-              <option value="1-2 years">1-2 years</option>
-              <option value="2-4 years">2-4 years</option>
-              <option value="4+ years">4+ years</option>
+              <option value="">Select your experience level</option>
+              <option value="Entry Level">Entry Level (0-1 years)</option>
+              <option value="1-2 years">Intermediate (1-2 years)</option>
+              <option value="2-4 years">Experienced (2-4 years)</option>
+              <option value="4+ years">Expert (4+ years)</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Required Skills (comma separated)</label>
-            <input type="text" name="skills" required className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., JavaScript, React, Node.js" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Skills & Expertise (comma separated)</label>
+            <input
+              type="text"
+              name="skills"
+              required
+              placeholder="e.g., JavaScript, React, Node.js, UI/UX Design"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range (Optional)</label>
-            <input type="text" name="salaryRange" placeholder="e.g., $50,000 - $70,000" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service Rate (Optional)</label>
+            <input
+              type="text"
+              name="salaryRange"
+              placeholder="e.g., $25/hour, $500/project, or $50,000/year"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Job Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
             <select name="jobType" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="full-time">Full Time</option>
-              <option value="part-time">Part Time</option>
-              <option value="contract">Contract</option>
-              <option value="internship">Internship</option>
+              <option value="hourly">Hourly Rate</option>
+              <option value="project">Project-Based</option>
+              <option value="contract">Long-term Contract</option>
+              <option value="consultation">Consultation</option>
             </select>
           </div>
+
+          {/* Resume Upload Section */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
-            <textarea name="description" required rows="6" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Upload Resume/CV</label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div className="space-y-1 text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div className="flex text-sm text-gray-600">
+                  <label htmlFor="resume-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                    <span>Upload your resume</span>
+                    <input
+                      id="resume-upload"
+                      name="resume"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="sr-only"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          // Validate file type
+                          const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                          if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)) {
+                            alert('Please upload a PDF, DOC, or DOCX file.');
+                            e.target.value = '';
+                            return;
+                          }
+                          // Validate file size (5MB limit)
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('File size must be less than 5MB.');
+                            e.target.value = '';
+                            return;
+                          }
+                          // Update UI to show selected file
+                          const fileInfo = e.target.parentElement.parentElement.querySelector('.file-info');
+                          if (fileInfo) {
+                            fileInfo.textContent = `Selected: ${file.name}`;
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
+                <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 5MB</p>
+                <p className="file-info text-sm text-green-600"></p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service Description</label>
+            <textarea
+              name="description"
+              required
+              rows="6"
+              placeholder="Describe your freelancing services, what you offer, your approach, and what makes you unique..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
           </div>
           <div>
             <button
@@ -1470,7 +1607,7 @@ export default function App() {
               disabled={loading}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition-colors"
             >
-              {loading ? 'Posting...' : 'Post Job'}
+              {loading ? 'Posting Service...' : 'Post Freelancing Service'}
             </button>
           </div>
         </form>
@@ -1510,7 +1647,7 @@ export default function App() {
 
   const renderRecruiterApplications = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Job Applications</h2>
+      <h2 className="text-2xl font-bold mb-6">SERVICE APPLICATIONS</h2>
       <div className="mb-4">
         <button
           onClick={loadRecruiterApplications}
@@ -1590,35 +1727,59 @@ export default function App() {
     e.preventDefault();
     console.log('Form submitted:', { isLogin, formData });
 
+    // Prevent double submission
+    if (loading) {
+      console.log('Form submission already in progress, ignoring...');
+      return;
+    }
+
+    // Clear any existing errors
+    setError('');
+
     // Client-side validation
     if (!isLogin) {
+      // Registration validation
+      if (!formData.email.trim()) {
+        setError('Email is required for registration');
+        return;
+      }
+      if (!formData.password.trim()) {
+        setError('Password is required for registration');
+        return;
+      }
       if (formData.password.length < 6) {
         setError('Password must be at least 6 characters long');
         return;
       }
       if (!formData.fullName.trim()) {
-        setError('Full name is required');
+        setError('Full name is required for registration');
         return;
       }
-      if (!formData.email.trim()) {
-        setError('Email is required');
+      if (formData.userType === 'recruiter' && !formData.companyName.trim()) {
+        setError('Company name is required for recruiters');
         return;
       }
     } else {
+      // Login validation
       if (!formData.email.trim()) {
-        setError('Email is required');
+        setError('Email is required for login');
         return;
       }
       if (!formData.password.trim()) {
-        setError('Password is required');
+        setError('Password is required for login');
         return;
       }
     }
 
-    if (isLogin) {
-      await handleLogin(formData.email, formData.password);
-    } else {
-      await handleRegister(formData);
+    try {
+      if (isLogin) {
+        await handleLogin(formData.email, formData.password);
+      } else {
+        await handleRegister(formData);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      // Error is already handled in handleLogin/handleRegister
     }
   };
 
@@ -1808,7 +1969,7 @@ export default function App() {
                           : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                       } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                     >
-                      Dashboard
+                      DASHBOARD
                     </button>
 
                     {user?.userType === 'jobseeker' && (
@@ -1916,7 +2077,7 @@ export default function App() {
                               : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                         >
-                          My Jobs
+                          MY SERVICES
                         </button>
                         <button
                           onClick={() => setActiveTab('post-job')}
@@ -1926,7 +2087,7 @@ export default function App() {
                               : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                         >
-                          Post Job
+                          POST SERVICE
                         </button>
                         <button
                           onClick={() => setActiveTab('recruiter-applications')}
@@ -1936,7 +2097,7 @@ export default function App() {
                               : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                         >
-                          Applications
+                          APPLICATIONS
                         </button>
                       </>
                     )}
@@ -2106,10 +2267,26 @@ export default function App() {
         onGetStarted={() => {
           setShowLandingPage(false);
           setIsLogin(false); // Show registration form
+          setError(''); // Clear any existing errors
+          setFormData({
+            email: '',
+            password: '',
+            fullName: '',
+            userType: 'jobseeker',
+            companyName: ''
+          }); // Reset form data
         }}
         onLogin={() => {
           setShowLandingPage(false);
           setIsLogin(true); // Show login form
+          setError(''); // Clear any existing errors
+          setFormData({
+            email: '',
+            password: '',
+            fullName: '',
+            userType: 'jobseeker',
+            companyName: ''
+          }); // Reset form data
         }}
       />
     );
