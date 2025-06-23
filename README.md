@@ -1,3 +1,6 @@
+# INFINITY-CODERS-R1-CIH-2.0
+## CENTRAL INDIA HACKATHON 2.0
+
 # 🚀 Job Portal Application
 
 A full-stack job portal application built with React, Node.js, Express, and MongoDB.
