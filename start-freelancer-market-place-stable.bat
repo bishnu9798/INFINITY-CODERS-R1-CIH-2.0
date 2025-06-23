@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 Starting Job Portal System (Stable Version)...
+echo 🚀 Starting Freelancer-market-place System (Stable Version)...
 echo.
 
 REM Check if Node.js is installed
@@ -23,7 +23,7 @@ timeout /t 2 /nobreak >nul
 echo.
 echo 🔧 Starting Backend Server (Test Auth)...
 echo Backend will run on: http://localhost:3002
-start "Job Portal Backend" cmd /k "cd /d "%~dp0backend" && node test-auth.js"
+start "Freelancer-market-place Backend" cmd /k "cd /d "%~dp0backend" && node test-auth.js"
 
 REM Wait for backend to start
 echo ⏳ Waiting for backend to initialize...
@@ -32,14 +32,14 @@ timeout /t 5 /nobreak >nul
 echo.
 echo 🌐 Starting Frontend Server...
 echo Frontend will run on: http://localhost:5173
-start "Job Portal Frontend" cmd /k "cd /d "%~dp0" && npx vite"
+start "Freelancer-market-place Frontend" cmd /k "cd /d "%~dp0" && npx vite"
 
 REM Wait for frontend to start
 echo ⏳ Waiting for frontend to initialize...
 timeout /t 8 /nobreak >nul
 
 echo.
-echo 🎉 Job Portal is starting up!
+echo 🎉 Freelancer-market-place is starting up!
 echo.
 echo 📋 System URLs:
 echo   Frontend: http://localhost:5173/

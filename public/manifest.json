@@ -1,7 +1,7 @@
 {
-  "name": "FREELANCER MARKET PLACE - Find Your Dream Job",
-  "short_name": "FREELANCER MARKET PLACE",
-  "description": "A comprehensive freelancer marketplace for job seekers and recruiters",
+  "name": "Freelancer-market-place - Connect & Collaborate",
+  "short_name": "Freelancer-market-place",
+  "description": "A comprehensive freelancer marketplace for freelancers and clients",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1f2937",

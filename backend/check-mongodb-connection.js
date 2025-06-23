@@ -39,7 +39,7 @@ async function checkMongoDBConnection() {
 
     // Show exact connection details for Atlas dashboard
     console.log('\n🌐 MongoDB Atlas Dashboard Info:');
-    console.log('Cluster: cluster0.u1j1h2t.mongodb.net');
+    console.log('Cluster: cluster0.6tyf80w.mongodb.net');
     console.log('Database Name:', conn.connection.name);
     console.log('Username: manishkumarcse07');
     console.log('Collections to look for: users, jobs, applications');

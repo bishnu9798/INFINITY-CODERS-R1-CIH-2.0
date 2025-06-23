@@ -9,7 +9,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-console.log('🚀 Starting Job Portal Server with MongoDB...');
+console.log('🚀 Starting Freelancer-market-place Server with MongoDB...');
 console.log('📍 Port:', PORT);
 
 // Basic middleware setup
@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Job Portal API is running with MongoDB',
+    message: 'Freelancer-market-place API is running with MongoDB',
     timestamp: new Date().toISOString(),
     database: 'Connected'
   });
@@ -83,7 +83,7 @@ const startServer = async () => {
     console.log('🔄 Starting HTTP server...');
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log('');
-      console.log('🎉 ===== JOB PORTAL SERVER READY =====');
+      console.log('🎉 ===== FREELANCER-MARKET-PLACE SERVER READY =====');
       console.log(`🚀 Server: http://localhost:${PORT}`);
       console.log(`📊 Health: http://localhost:${PORT}/api/health`);
       console.log(`🌐 Frontend: http://localhost:5173`);

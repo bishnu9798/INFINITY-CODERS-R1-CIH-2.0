@@ -120,7 +120,7 @@ async function finalStatusCheck() {
       console.log('🔑 Your Accounts:');
       console.log('   Recruiter: manishmodi0408@gmail.com / 987654');
       console.log('   Job Seeker: manish1@gmail.com / 123456');
-      console.log('\n✨ Your job portal is ready to use!');
+      console.log('\n✨ Your freelancer marketplace is ready to use!');
     } else {
       console.log('⚠️ SYSTEM STATUS: SOME ISSUES DETECTED');
       console.log('Please check the errors above and restart the affected services.');
