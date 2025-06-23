@@ -52,7 +52,7 @@
     </div>
 
     <div class="test-section">
-        <h2>Step 4: View Recruiter Jobs</h2>
+        <h2>Step 4: View Freelancer Jobs</h2>
         <button onclick="getRecruiterJobs()">Get My Jobs</button>
         <div id="recruiterJobsResult" class="result"></div>
     </div>
@@ -92,10 +92,10 @@
                 const response = await fetch(`${API_BASE}/jobs/recruiter/my-jobs`);
                 const jobs = await response.json();
                 result.className = 'result success';
-                result.innerHTML = `✅ Found ${jobs.length} recruiter jobs:<br><pre>${JSON.stringify(jobs, null, 2)}</pre>`;
+                result.innerHTML = `✅ Found ${jobs.length} freelancer jobs:<br><pre>${JSON.stringify(jobs, null, 2)}</pre>`;
             } catch (error) {
                 result.className = 'result error';
-                result.textContent = `❌ Failed to get recruiter jobs: ${error.message}`;
+                result.textContent = `❌ Failed to get freelancer jobs: ${error.message}`;
             }
         }
 

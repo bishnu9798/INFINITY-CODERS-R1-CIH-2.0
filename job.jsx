@@ -5,7 +5,7 @@ Home Page: A clean and professional landing page with a job search bar (keyword 
 
 Job Listings Page: Display jobs with filters (category, location, job type, experience level).
 
-Job Detail Page: Show job title, company info, job description, requirements, application deadline, and an “Apply Now” button.
+Job Detail Page: Show job title, company info, job description, requirements, application deadline, and an "Apply Now" button.
 
 User Authentication: Separate registration and login for job seekers and employers.
 
@@ -31,6 +31,11 @@ const App = () => {
   const [activePage, setActivePage] = useState('home');
   const [userRole, setUserRole] = useState(null); // null | 'jobSeeker' | 'employer' | 'admin'
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [users, setUsers] = useState([
+    { name: 'Alice Johnson', email: 'alice@example.com', role: 'Job Seeker', status: 'Active' },
+    { name: 'Bob Smith', email: 'bob@example.com', role: 'Employer', status: 'Suspended' },
+    { name: 'Charlie Brown', email: 'charlie@example.com', role: 'Job Seeker', status: 'Active' },
+  ]);
 
   // Mock data for jobs
   const featuredJobs = [
@@ -50,6 +55,22 @@ const App = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleEditUser = (idx) => {
+    const user = users[idx];
+    const newName = window.prompt('Edit Name:', user.name);
+    if (!newName) return;
+    const newEmail = window.prompt('Edit Email:', user.email);
+    if (!newEmail) return;
+    const updatedUsers = [...users];
+    updatedUsers[idx] = { ...user, name: newName, email: newEmail };
+    setUsers(updatedUsers);
+  };
+
+  const handleDeleteUser = (idx) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    setUsers(users.filter((_, i) => i !== idx));
   };
 
   const renderHomePage = () => (
@@ -395,7 +416,7 @@ const App = () => {
         <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              {userType === 'employer' ? 'Employer Registration' : 'Job Seeker Registration'}
+              {userType === 'employer' ? 'Freelancer Registration' : 'Client Registration'}
             </h2>
             
             <form className="space-y-4">
@@ -491,13 +512,13 @@ const App = () => {
                   className={`flex-1 py-2 px-4 text-center ${!isEmployer ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
                   onClick={() => setIsEmployer(false)}
                 >
-                  Job Seeker
+                  Client
                 </button>
                 <button 
                   className={`flex-1 py-2 px-4 text-center ${isEmployer ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
                   onClick={() => setIsEmployer(true)}
                 >
-                  Employer
+                  Freelancer
                 </button>
               </div>
             </div>
@@ -645,8 +666,8 @@ const App = () => {
               </h2>
             </div>
             <div className="divide-y divide-gray-200">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="p-6 flex items-center justify-between">
+              {users.map((user, idx) => (
+                <div key={idx} className="p-6 flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center mr-4">
                       <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -655,16 +676,16 @@ const App = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-medium text-gray-800">
-                        {isEmployer ? 'Sarah Johnson' : 'Senior Software Engineer'}
+                        {user.name}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {isEmployer ? 'Applied to: Senior Developer Role' : 'Applied on April 5, 2024'}
+                        {user.email}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full mb-2">
-                      {isEmployer ? 'Pending Review' : 'In Progress'}
+                      {user.status}
                     </span>
                     <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                       View Details
@@ -785,11 +806,7 @@ const App = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {[
-                    { name: 'Alice Johnson', email: 'alice@example.com', role: 'Job Seeker', status: 'Active' },
-                    { name: 'Bob Smith', email: 'bob@example.com', role: 'Employer', status: 'Suspended' },
-                    { name: 'Charlie Brown', email: 'charlie@example.com', role: 'Job Seeker', status: 'Active' },
-                  ].map((user, idx) => (
+                  {users.map((user, idx) => (
                     <tr key={idx}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -807,16 +824,12 @@ const App = () => {
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {user.status}
-                        </span>
+                      <td className={`px-6 py-4 whitespace-nowrap`}>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{user.status}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
-                        <button className="text-red-600 hover:text-red-900">Delete</button>
+                        <button className="text-blue-600 hover:text-blue-900 mr-4" onClick={() => handleEditUser(idx)}>Edit</button>
+                        <button className="text-red-600 hover:text-red-900" onClick={() => handleDeleteUser(idx)}>Delete</button>
                       </td>
                     </tr>
                   ))}

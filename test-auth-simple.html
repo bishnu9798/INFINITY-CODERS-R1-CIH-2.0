@@ -49,8 +49,8 @@
                 <div class="form-group">
                     <label>User Type:</label>
                     <select id="regUserType">
-                        <option value="jobseeker">Job Seeker</option>
-                        <option value="recruiter">Recruiter</option>
+                        <option value="jobseeker">Client</option>
+                        <option value="recruiter">Freelancer</option>
                     </select>
                 </div>
                 <div class="form-group" id="companyGroup" style="display: none;">
@@ -152,86 +152,4 @@
                 
                 if (response.ok) {
                     result.className = 'result success';
-                    result.textContent = `✅ Registration Successful! User ID: ${data.user.id || data.user._id}`;
-                } else {
-                    result.className = 'result error';
-                    result.textContent = `❌ Registration Failed: ${data.error || JSON.stringify(data.errors)}`;
-                }
-            } catch (error) {
-                result.className = 'result error';
-                result.textContent = `❌ Network Error: ${error.message}`;
-            }
-        });
-
-        // Login form
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const result = document.getElementById('loginResult');
-            result.style.display = 'block';
-            result.textContent = 'Logging in...';
-            result.className = 'result';
-
-            const loginData = {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(loginData)
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    result.className = 'result success';
-                    result.textContent = `✅ Login Successful! Welcome ${data.user.fullName || data.user.full_name}`;
-                } else {
-                    result.className = 'result error';
-                    result.textContent = `❌ Login Failed: ${data.error}`;
-                }
-            } catch (error) {
-                result.className = 'result error';
-                result.textContent = `❌ Network Error: ${error.message}`;
-            }
-        });
-
-        // Test existing user
-        async function testExistingUser(email, password) {
-            const result = document.getElementById('existingUserResult');
-            result.style.display = 'block';
-            result.textContent = `Testing login for ${email}...`;
-            result.className = 'result';
-
-            try {
-                const response = await fetch(`${API_BASE}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    result.className = 'result success';
-                    result.textContent = `✅ ${email} Login Successful! Welcome ${data.user.fullName || data.user.full_name}`;
-                } else {
-                    result.className = 'result error';
-                    result.textContent = `❌ ${email} Login Failed: ${data.error}`;
-                }
-            } catch (error) {
-                result.className = 'result error';
-                result.textContent = `❌ Network Error: ${error.message}`;
-            }
-        }
-
-        // Test connection on page load
-        window.onload = () => {
-            testConnection();
-        };
-    </script>
-</body>
-</html>
+                    result.textContent = `

@@ -155,7 +155,7 @@ export default function App() {
       // Convert MongoDB _id to id for frontend compatibility
       const jobsWithId = response.data.map(job => ({
         ...job,
-        id: job._id,
+        id: (job._id || job.id || '').toString(),
         skills: typeof job.skills === 'string' ? job.skills.split(',').map(s => s.trim()) : job.skills || []
       }));
       setRecruiterJobs(jobsWithId);
@@ -1171,14 +1171,33 @@ export default function App() {
               <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <div className="flex text-sm text-gray-600">
-                <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+              <div className="flex text-sm text-gray-600 justify-center">
+                <label htmlFor="resume-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
                   <span>Upload a file</span>
-                  <input type="file" accept=".pdf,.docx" onChange={handleResumeUpload} className="sr-only" />
+                  <input
+                    id="resume-upload"
+                    name="resume"
+                    type="file"
+                    className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        if (file.size > 10 * 1024 * 1024) {
+                          alert('File size must be less than 10MB.');
+                          e.target.value = '';
+                          return;
+                        }
+                        setResume(file);
+                      }
+                    }}
+                  />
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
-              <p className="text-xs text-gray-500">PDF or DOCX up to 10MB</p>
+              <p className="text-xs text-gray-500">Any file type up to 10MB</p>
+              {resume && (
+                <p className="file-info text-sm text-green-600">Selected: {resume.name}</p>
+              )}
             </div>
           </div>
         </div>
@@ -1396,16 +1415,24 @@ export default function App() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {recruiterJobs.map(job => (
-            <div key={job.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div key={job.id || job._id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
               <div className="flex justify-between items-start mb-4">
                 <h4 className="text-xl font-bold text-blue-600">{job.title}</h4>
-                <button
-                  onClick={() => handleDeleteJob(job.id, job.title)}
-                  disabled={loading}
-                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-3 py-1 rounded-md transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEditJobClick(job)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteJob(job.id || job._id, job.title)}
+                    disabled={loading}
+                    className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-3 py-1 rounded-md transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
               <p className="text-gray-700 font-medium">{job.company}</p>
               <p className="text-sm text-gray-500">{job.location} | {job.experience}</p>
@@ -1549,44 +1576,33 @@ export default function App() {
                 <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                   <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                <div className="flex text-sm text-gray-600">
-                  <label htmlFor="resume-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                    <span>Upload your resume</span>
+                <div className="flex text-sm text-gray-600 justify-center">
+                  <label htmlFor="resume-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                    <span>Upload a file</span>
                     <input
                       id="resume-upload"
                       name="resume"
                       type="file"
-                      accept=".pdf,.doc,.docx"
-                      className="sr-only"
+                      className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
                       onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
-                          // Validate file type
-                          const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-                          if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)) {
-                            alert('Please upload a PDF, DOC, or DOCX file.');
+                          if (file.size > 10 * 1024 * 1024) {
+                            alert('File size must be less than 10MB.');
                             e.target.value = '';
                             return;
                           }
-                          // Validate file size (5MB limit)
-                          if (file.size > 5 * 1024 * 1024) {
-                            alert('File size must be less than 5MB.');
-                            e.target.value = '';
-                            return;
-                          }
-                          // Update UI to show selected file
-                          const fileInfo = e.target.parentElement.parentElement.querySelector('.file-info');
-                          if (fileInfo) {
-                            fileInfo.textContent = `Selected: ${file.name}`;
-                          }
+                          setResume(file);
                         }
                       }}
                     />
                   </label>
                   <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 5MB</p>
-                <p className="file-info text-sm text-green-600"></p>
+                <p className="text-xs text-gray-500">Any file type up to 10MB</p>
+                {resume && (
+                  <p className="file-info text-sm text-green-600">Selected: {resume.name}</p>
+                )}
               </div>
             </div>
           </div>
@@ -1887,8 +1903,8 @@ export default function App() {
                       onChange={handleInputChange}
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
-                      <option value="jobseeker">Job Seeker</option>
-                      <option value="recruiter">Recruiter</option>
+                      <option value="jobseeker">Client</option>
+                      <option value="recruiter">Freelancer</option>
                     </select>
                   </div>
                   {formData.userType === 'recruiter' && (
