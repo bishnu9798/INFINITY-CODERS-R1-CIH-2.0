@@ -219,7 +219,7 @@ const InteractiveDemo = ({ onGetStarted }) => {
                     <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                     <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                   </div>
-                  <span className="text-xs text-gray-500">Job Portal 2025</span>
+                  <span className="text-xs text-gray-500">FREELANCER MARKET PLACE</span>
                 </div>
                 
                 <div className="bg-white rounded-lg p-6 min-h-[200px] flex items-center justify-center">

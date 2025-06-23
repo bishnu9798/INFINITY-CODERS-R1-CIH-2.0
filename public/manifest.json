@@ -1,7 +1,7 @@
 {
-  "name": "Job Portal - Find Your Dream Job",
-  "short_name": "Job Portal",
-  "description": "A comprehensive job portal for job seekers and recruiters",
+  "name": "FREELANCER MARKET PLACE - Find Your Dream Job",
+  "short_name": "FREELANCER MARKET PLACE",
+  "description": "A comprehensive freelancer marketplace for job seekers and recruiters",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1f2937",

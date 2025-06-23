@@ -103,7 +103,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 <span className="text-white font-bold text-sm">JP</span>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Job Portal 2025
+                FREELANCER MARKET PLACE
               </span>
             </div>
             <div className="flex items-center space-x-4">
@@ -559,7 +559,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">JP</span>
                 </div>
-                <span className="text-xl font-bold">Job Portal 2025</span>
+                <span className="text-xl font-bold">FREELANCER MARKET PLACE</span>
               </div>
               <p className="text-gray-400">
                 Connecting talent with opportunity through innovation and technology.
@@ -594,7 +594,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Job Portal. All rights reserved.</p>
+            <p>&copy; 2025 FREELANCER MARKET PLACE. All rights reserved.</p>
           </div>
         </div>
       </footer>
