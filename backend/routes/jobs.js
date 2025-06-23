@@ -170,27 +170,26 @@ router.put('/:id', authenticateToken, [
 // Delete job (recruiter only)
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
-    if (req.user.userType !== 'recruiter') {
-      return res.status(403).json({ error: 'Only recruiters can delete jobs' });
-    }
-
+    // Log user and job info for debugging
+    console.log('Delete request by user:', req.user);
     const { id } = req.params;
-
-    // First check if job belongs to this recruiter
     const job = await Job.findById(id);
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }
-
-    if (job.recruiter_id.toString() !== req.user.userId) {
-      return res.status(403).json({ error: 'You can only delete your own jobs' });
+    // Check user type
+    if (req.user.userType !== 'recruiter') {
+      return res.status(403).json({ error: 'Only freelancers (recruiters) can delete their own services.' });
     }
-
+    // Check job ownership
+    if (job.recruiter_id.toString() !== req.user.userId) {
+      return res.status(403).json({ error: 'You can only delete your own services.' });
+    }
     await Job.findByIdAndDelete(id);
-
-    res.json({ message: 'Job deleted successfully' });
+    res.json({ message: 'Service deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete job' });
+    console.error('Delete job error:', error);
+    res.status(500).json({ error: 'Failed to delete service' });
   }
 });
 
