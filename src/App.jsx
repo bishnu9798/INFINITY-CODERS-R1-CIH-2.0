@@ -3,10 +3,6 @@ import { authAPI, jobsAPI, applicationsAPI, usersAPI } from './services/api-mock
 import LandingPage from './components/LandingPage';
 import AdvancedJobSearch from './components/AdvancedJobSearch';
 import EnhancedJobCard from './components/EnhancedJobCard';
-import AssessmentSystem from './components/AssessmentSystem';
-import SmartAutomation from './components/SmartAutomation';
-import InterviewWorkflow from './components/InterviewWorkflow';
-import AnalyticsInsights from './components/AnalyticsInsights';
 import { filterJobs, sortJobsByRelevance, getFilterSummary } from './utils/jobFilters';
 import './enhanced-styles.css';
 
@@ -56,7 +52,7 @@ export default function App() {
     email: '',
     password: '',
     fullName: '',
-    userType: 'jobseeker',
+    userType: 'jobseeker', // 'jobseeker' = Client, 'recruiter' = Freelancer
     companyName: ''
   });
 
@@ -866,9 +862,9 @@ export default function App() {
                   defaultValue={userProfile?.bio || ''}
                   rows="6"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Tell us about yourself, your experience, and what you're looking for in your next role..."
+                  placeholder="Tell us about yourself, your experience, and what you're looking for in your next project..."
                 ></textarea>
-                <p className="text-xs text-gray-500 mt-1">This will be visible to recruiters when you apply for jobs</p>
+                <p className="text-xs text-gray-500 mt-1">This will be visible to freelancers when you apply for projects</p>
               </div>
             </div>
 
@@ -1158,60 +1154,7 @@ export default function App() {
     </div>
   );
 
-  const renderResumeUpload = () => {
-    console.log('Rendering resume upload tab');
-    return (
-      <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Upload Your Resume</h2>
-      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 max-w-2xl mx-auto">
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Upload Resume (PDF or DOCX)</label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="flex text-sm text-gray-600">
-                <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                  <span>Upload a file</span>
-                  <input type="file" accept=".pdf,.docx" onChange={handleResumeUpload} className="sr-only" />
-                </label>
-                <p className="pl-1">or drag and drop</p>
-              </div>
-              <p className="text-xs text-gray-500">PDF or DOCX up to 10MB</p>
-            </div>
-          </div>
-        </div>
-        {resume && (
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <svg className="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <div>
-                  <span className="font-medium text-green-800">{resume.name}</span>
-                  <div className="text-sm text-green-600">
-                    Size: {(resume.size / 1024).toFixed(2)} KB | Type: {resume.type}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setResume(null)}
-                className="text-red-600 hover:text-red-800 text-sm"
-              >
-                Remove
-              </button>
-            </div>
-            <div className="mt-2 text-sm text-green-700">
-              ✅ Resume ready for job applications
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-    );
-  };
+
 
   const renderEditJobModal = () => {
     if (!showEditModal || !editingJob) return null;
@@ -1662,7 +1605,7 @@ export default function App() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied Date</th>
@@ -1756,7 +1699,7 @@ export default function App() {
         return;
       }
       if (formData.userType === 'recruiter' && !formData.companyName.trim()) {
-        setError('Company name is required for recruiters');
+        setError('Business/Company name is required for freelancers');
         return;
       }
     } else {
@@ -1887,13 +1830,13 @@ export default function App() {
                       onChange={handleInputChange}
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
-                      <option value="jobseeker">Job Seeker</option>
-                      <option value="recruiter">Recruiter</option>
+                      <option value="jobseeker">Client</option>
+                      <option value="recruiter">Freelancer</option>
                     </select>
                   </div>
                   {formData.userType === 'recruiter' && (
                     <div>
-                      <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">Company Name</label>
+                      <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">Business/Company Name</label>
                       <input
                         id="companyName"
                         name="companyName"
@@ -2013,56 +1956,6 @@ export default function App() {
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                         >
                           Applications
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('resume')}
-                          className={`${
-                            activeTab === 'resume'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Resume
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('assessments')}
-                          className={`${
-                            activeTab === 'assessments'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Assessments
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('automation')}
-                          className={`${
-                            activeTab === 'automation'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          AI Automation
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('interviews')}
-                          className={`${
-                            activeTab === 'interviews'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Interviews
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('analytics')}
-                          className={`${
-                            activeTab === 'analytics'
-                              ? `border-blue-500 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                              : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                          } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-                        >
-                          Analytics
                         </button>
                       </>
                     )}
@@ -2305,11 +2198,6 @@ export default function App() {
         {activeTab === 'jobs' && renderJobs()}
         {activeTab === 'saved-jobs' && renderSavedJobs()}
         {activeTab === 'applications' && renderApplications()}
-        {activeTab === 'resume' && renderResumeUpload()}
-        {activeTab === 'assessments' && <AssessmentSystem darkMode={darkMode} user={user} onUpdateProfile={updateUserProfile} />}
-        {activeTab === 'automation' && <SmartAutomation darkMode={darkMode} user={user} jobs={jobs} applications={applications} />}
-        {activeTab === 'interviews' && <InterviewWorkflow darkMode={darkMode} user={user} applications={applications} jobs={jobs} />}
-        {activeTab === 'analytics' && <AnalyticsInsights darkMode={darkMode} user={user} jobs={jobs} applications={applications} />}
         {activeTab === 'notifications' && renderNotifications()}
         {activeTab === 'recruiter-jobs' && renderRecruiterJobs()}
         {activeTab === 'post-job' && renderPostJob()}
