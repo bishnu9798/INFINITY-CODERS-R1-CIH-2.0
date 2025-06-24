@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend My Services</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .service-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .service-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .service-detail {
+            margin: 5px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Frontend "My Services" Functionality</h1>
+        <p>This page tests the complete flow: Register → Login → Create Service → View My Services</p>
+        
+        <div id="status" class="status info">
+            Ready to test My Services functionality...
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔑 Step 1: Login as Recruiter</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="myservices@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" value="password123" required>
+            </div>
+            <button type="submit">Login</button>
+            <button type="button" onclick="registerUser()">Register New User</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>📝 Step 2: Create Test Service</h2>
+        <button onclick="createTestService()" id="createServiceBtn" disabled>Create Test Service</button>
+        <div id="serviceCreationResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>📋 Step 3: Load My Services</h2>
+        <button onclick="loadMyServices()" id="loadServicesBtn" disabled>Load My Services</button>
+        <div id="myServicesResult"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3002/api';
+        let authToken = null;
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = message;
+        }
+
+        async function registerUser() {
+            try {
+                updateStatus('Registering new user...', 'info');
+                
+                const userData = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    fullName: 'My Services Test User',
+                    userType: 'recruiter',
+                    companyName: 'My Services Test Company'
+                };
+
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    updateStatus('✅ User registered and logged in successfully!', 'success');
+                    document.getElementById('createServiceBtn').disabled = false;
+                    document.getElementById('loadServicesBtn').disabled = false;
+                } else {
+                    updateStatus(`❌ Registration failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Registration error: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                updateStatus('Logging in...', 'info');
+                
+                const loginData = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                };
+
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    updateStatus('✅ Login successful!', 'success');
+                    document.getElementById('createServiceBtn').disabled = false;
+                    document.getElementById('loadServicesBtn').disabled = false;
+                } else {
+                    updateStatus(`❌ Login failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Login error: ${error.message}`, 'error');
+            }
+        });
+
+        async function createTestService() {
+            if (!authToken) {
+                updateStatus('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                updateStatus('Creating test service...', 'info');
+                
+                const formData = new FormData();
+                formData.append('title', `Test Service - ${new Date().toLocaleTimeString()}`);
+                formData.append('mobile', '+1-555-TEST-123');
+                formData.append('email', 'testservice@example.com');
+                formData.append('company', 'My Services Test Company');
+                formData.append('location', 'Remote');
+                formData.append('experience', '3-5 years');
+                formData.append('skills', 'JavaScript, React, Node.js, Testing');
+                formData.append('description', 'This is a test service created to verify the My Services functionality is working correctly.');
+                formData.append('salaryRange', '$50-70/hour');
+                formData.append('serviceType', 'hourly');
+
+                const response = await fetch(`${API_BASE_URL}/services`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    updateStatus('✅ Test service created successfully!', 'success');
+                    document.getElementById('serviceCreationResult').innerHTML = `
+                        <div class="service-card">
+                            <div class="service-title">✅ Service Created</div>
+                            <div class="service-detail">Service ID: ${data.serviceId}</div>
+                            <div class="service-detail">Created at: ${new Date().toLocaleString()}</div>
+                        </div>
+                    `;
+                } else {
+                    updateStatus(`❌ Service creation failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Service creation error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadMyServices() {
+            if (!authToken) {
+                updateStatus('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                updateStatus('Loading My Services...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/services/recruiter/my-services`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const services = await response.json();
+                if (response.ok) {
+                    updateStatus(`✅ My Services loaded successfully! Found ${services.length} services`, 'success');
+                    
+                    let servicesHtml = '';
+                    if (services.length === 0) {
+                        servicesHtml = '<div class="service-card"><div class="service-title">No services found</div><div class="service-detail">Create a service first to see it here.</div></div>';
+                    } else {
+                        services.forEach((service, index) => {
+                            servicesHtml += `
+                                <div class="service-card">
+                                    <div class="service-title">${service.title}</div>
+                                    <div class="service-detail"><strong>Mobile:</strong> ${service.mobile}</div>
+                                    <div class="service-detail"><strong>Email:</strong> ${service.email}</div>
+                                    <div class="service-detail"><strong>Company:</strong> ${service.company}</div>
+                                    <div class="service-detail"><strong>Location:</strong> ${service.location}</div>
+                                    <div class="service-detail"><strong>Experience:</strong> ${service.experience}</div>
+                                    <div class="service-detail"><strong>Skills:</strong> ${service.skills}</div>
+                                    <div class="service-detail"><strong>Service Type:</strong> ${service.service_type}</div>
+                                    <div class="service-detail"><strong>Status:</strong> ${service.status}</div>
+                                    <div class="service-detail"><strong>Created:</strong> ${new Date(service.created_at).toLocaleString()}</div>
+                                    <div class="service-detail"><strong>Service ID:</strong> ${service._id}</div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    document.getElementById('myServicesResult').innerHTML = servicesHtml;
+                } else {
+                    updateStatus(`❌ Failed to load My Services: ${services.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ My Services loading error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-load services if already logged in
+        window.addEventListener('load', () => {
+            updateStatus('Ready to test My Services functionality', 'info');
+        });
+    </script>
+</body>
+</html>

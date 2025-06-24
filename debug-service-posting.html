@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Service Posting Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .debug-section {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .debug-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Service Posting Issue</h1>
+        <p>This tool will help diagnose why service posting is failing in the frontend.</p>
+        
+        <div id="status" class="status info">
+            Ready to debug service posting issue...
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="container">
+            <h2>🔍 Step 1: Environment Check</h2>
+            <button onclick="checkEnvironment()">Check Environment</button>
+            <div id="envResult"></div>
+        </div>
+
+        <div class="container">
+            <h2>🔑 Step 2: Authentication Test</h2>
+            <button onclick="testAuth()">Test Authentication</button>
+            <div id="authResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📝 Step 3: Service Posting Debug</h2>
+        <button onclick="debugServicePosting()">Debug Service Posting</button>
+        <div id="serviceResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>📊 Step 4: Network Analysis</h2>
+        <button onclick="analyzeNetwork()">Analyze Network</button>
+        <div id="networkResult"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3002/api';
+        let authToken = null;
+        let debugInfo = {};
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = message;
+        }
+
+        async function checkEnvironment() {
+            const envEl = document.getElementById('envResult');
+            envEl.innerHTML = '<div class="debug-section"><div class="debug-title">🔄 Checking environment...</div></div>';
+            
+            try {
+                // Check current URL
+                const currentUrl = window.location.href;
+                const frontendPort = window.location.port || '80';
+                
+                // Check if backend is accessible
+                const healthResponse = await fetch(`${API_BASE_URL}/health`);
+                const healthData = await healthResponse.json();
+                
+                // Check CORS
+                const corsResponse = await fetch(`${API_BASE_URL}/stats`, {
+                    method: 'OPTIONS'
+                });
+                
+                debugInfo.environment = {
+                    currentUrl,
+                    frontendPort,
+                    backendUrl: API_BASE_URL,
+                    backendHealth: healthData,
+                    corsStatus: corsResponse.status
+                };
+                
+                envEl.innerHTML = `
+                    <div class="debug-section">
+                        <div class="debug-title">✅ Environment Check Results</div>
+                        <pre>${JSON.stringify(debugInfo.environment, null, 2)}</pre>
+                    </div>
+                `;
+                
+                updateStatus('Environment check completed', 'success');
+                
+            } catch (error) {
+                envEl.innerHTML = `
+                    <div class="debug-section">
+                        <div class="debug-title">❌ Environment Check Failed</div>
+                        <pre>Error: ${error.message}</pre>
+                    </div>
+                `;
+                updateStatus('Environment check failed', 'error');
+            }
+        }
+
+        async function testAuth() {
+            const authEl = document.getElementById('authResult');
+            authEl.innerHTML = '<div class="debug-section"><div class="debug-title">🔄 Testing authentication...</div></div>';
+            
+            try {
+                // Register a test user
+                const registerData = {
+                    email: `debug-test-${Date.now()}@example.com`,
+                    password: 'password123',
+                    fullName: 'Debug Test User',
+                    userType: 'recruiter',
+                    companyName: 'Debug Test Company'
+                };
+                
+                const registerResponse = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registerData)
+                });
+                
+                const registerResult = await registerResponse.json();
+                
+                if (registerResponse.ok) {
+                    authToken = registerResult.token;
+                    
+                    // Test authenticated request
+                    const profileResponse = await fetch(`${API_BASE_URL}/users/profile`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    const profileResult = await profileResponse.json();
+                    
+                    debugInfo.auth = {
+                        registration: registerResult,
+                        profile: profileResult,
+                        token: authToken ? 'Present' : 'Missing'
+                    };
+                    
+                    authEl.innerHTML = `
+                        <div class="debug-section">
+                            <div class="debug-title">✅ Authentication Test Results</div>
+                            <pre>${JSON.stringify(debugInfo.auth, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    updateStatus('Authentication test completed', 'success');
+                } else {
+                    throw new Error(`Registration failed: ${registerResult.error}`);
+                }
+                
+            } catch (error) {
+                authEl.innerHTML = `
+                    <div class="debug-section">
+                        <div class="debug-title">❌ Authentication Test Failed</div>
+                        <pre>Error: ${error.message}</pre>
+                    </div>
+                `;
+                updateStatus('Authentication test failed', 'error');
+            }
+        }
+
+        async function debugServicePosting() {
+            const serviceEl = document.getElementById('serviceResult');
+            serviceEl.innerHTML = '<div class="debug-section"><div class="debug-title">🔄 Debugging service posting...</div></div>';
+            
+            if (!authToken) {
+                serviceEl.innerHTML = `
+                    <div class="debug-section">
+                        <div class="debug-title">❌ No Authentication Token</div>
+                        <p>Please run authentication test first</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                // Test 1: Simple service creation
+                const formData = new FormData();
+                formData.append('title', 'Debug Test Service');
+                formData.append('company', 'Debug Company');
+                formData.append('location', 'Remote');
+                formData.append('experience', '2-4 years');
+                formData.append('skills', 'JavaScript, React');
+                formData.append('description', 'Debug test service description');
+                formData.append('mobile', '+1-555-DEBUG');
+                formData.append('email', 'debug@example.com');
+                formData.append('salaryRange', '$50-70/hour');
+                formData.append('serviceType', 'hourly');
+                
+                console.log('Sending service creation request...');
+                
+                const serviceResponse = await fetch(`${API_BASE_URL}/services`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: formData
+                });
+                
+                const serviceResult = await serviceResponse.json();
+                
+                if (serviceResponse.ok) {
+                    // Test 2: Verify service was created
+                    const myServicesResponse = await fetch(`${API_BASE_URL}/services/recruiter/my-services`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    const myServices = await myServicesResponse.json();
+                    
+                    debugInfo.servicePosting = {
+                        creation: serviceResult,
+                        verification: myServices,
+                        status: 'SUCCESS'
+                    };
+                    
+                    serviceEl.innerHTML = `
+                        <div class="debug-section">
+                            <div class="debug-title">✅ Service Posting Debug Results</div>
+                            <pre>${JSON.stringify(debugInfo.servicePosting, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    updateStatus('Service posting debug completed - NO ISSUES FOUND!', 'success');
+                    
+                    // Clean up
+                    if (serviceResult.serviceId) {
+                        await fetch(`${API_BASE_URL}/services/${serviceResult.serviceId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                    }
+                    
+                } else {
+                    debugInfo.servicePosting = {
+                        error: serviceResult,
+                        status: 'FAILED',
+                        responseStatus: serviceResponse.status
+                    };
+                    
+                    serviceEl.innerHTML = `
+                        <div class="debug-section">
+                            <div class="debug-title">❌ Service Posting Failed</div>
+                            <pre>${JSON.stringify(debugInfo.servicePosting, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    updateStatus(`Service posting failed: ${serviceResult.error}`, 'error');
+                }
+                
+            } catch (error) {
+                serviceEl.innerHTML = `
+                    <div class="debug-section">
+                        <div class="debug-title">❌ Service Posting Debug Failed</div>
+                        <pre>Error: ${error.message}\nStack: ${error.stack}</pre>
+                    </div>
+                `;
+                updateStatus('Service posting debug failed', 'error');
+            }
+        }
+
+        async function analyzeNetwork() {
+            const networkEl = document.getElementById('networkResult');
+            networkEl.innerHTML = '<div class="debug-section"><div class="debug-title">🔄 Analyzing network...</div></div>';
+            
+            try {
+                // Test various endpoints
+                const tests = [
+                    { name: 'Health Check', url: `${API_BASE_URL}/health`, method: 'GET' },
+                    { name: 'Stats', url: `${API_BASE_URL}/stats`, method: 'GET' },
+                    { name: 'Services List', url: `${API_BASE_URL}/services`, method: 'GET' },
+                ];
+                
+                const results = {};
+                
+                for (const test of tests) {
+                    try {
+                        const start = Date.now();
+                        const response = await fetch(test.url, { method: test.method });
+                        const end = Date.now();
+                        const data = await response.json();
+                        
+                        results[test.name] = {
+                            status: response.status,
+                            ok: response.ok,
+                            responseTime: `${end - start}ms`,
+                            data: data
+                        };
+                    } catch (error) {
+                        results[test.name] = {
+                            error: error.message
+                        };
+                    }
+                }
+                
+                debugInfo.network = results;
+                
+                networkEl.innerHTML = `
+                    <div class="debug-section">
+                        <div class="debug-title">📊 Network Analysis Results</div>
+                        <pre>${JSON.stringify(debugInfo.network, null, 2)}</pre>
+                    </div>
+                `;
+                
+                updateStatus('Network analysis completed', 'success');
+                
+            } catch (error) {
+                networkEl.innerHTML = `
+                    <div class="debug-section">
+                        <div class="debug-title">❌ Network Analysis Failed</div>
+                        <pre>Error: ${error.message}</pre>
+                    </div>
+                `;
+                updateStatus('Network analysis failed', 'error');
+            }
+        }
+
+        // Auto-start environment check
+        window.addEventListener('load', () => {
+            updateStatus('Debug tool loaded. Click buttons to run diagnostics.', 'info');
+        });
+    </script>
+</body>
+</html>

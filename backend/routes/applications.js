@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const { body, validationResult } = require('express-validator');
 const Application = require('../models/Application.js');
-const Job = require('../models/Job.js');
+const Services = require('../models/Services.js');
 const User = require('../models/User.js');
 const { authenticateToken } = require('../middleware/auth.js');
 const path = require('path');
@@ -40,9 +40,13 @@ const upload = multer({
   }
 });
 
-// Apply for a job
+// Apply for a service
 router.post('/', authenticateToken, upload.single('resume'), [
-  body('jobId').isMongoId().withMessage('Invalid job ID format'),
+  body('serviceId').isMongoId().withMessage('Invalid service ID format'),
+  body('applicantName').notEmpty().trim().withMessage('Full name is required'),
+  body('applicantEmail').isEmail().normalizeEmail().withMessage('Valid email is required'),
+  body('applicantPhone').notEmpty().trim().withMessage('Phone number is required'),
+  body('applicantSkills').optional().trim(),
   body('coverLetter').optional().trim()
 ], async (req, res) => {
   try {
@@ -60,38 +64,40 @@ router.post('/', authenticateToken, upload.single('resume'), [
 
     if (req.user.userType !== 'jobseeker') {
       console.log('Non-jobseeker trying to apply:', req.user.userType);
-      return res.status(403).json({ error: 'Only job seekers can apply for jobs' });
+      return res.status(403).json({ error: 'Only job seekers can apply for services' });
     }
 
-    const { jobId, coverLetter } = req.body;
+    const { serviceId, applicantName, applicantEmail, applicantPhone, applicantSkills, coverLetter } = req.body;
     const resumeFilename = req.file ? req.file.filename : null;
 
-    if (!resumeFilename) {
-      console.log('No resume file uploaded');
-      return res.status(400).json({ error: 'Resume file is required' });
-    }
+    // Resume is now optional - we accept direct application data
+    console.log('Application data:', { applicantName, applicantEmail, applicantPhone, applicantSkills, resumeFilename });
 
-    // Check if job exists and is active
-    const job = await Job.findById(jobId);
-    if (!job || job.status !== 'active') {
-      return res.status(404).json({ error: 'Job not found or not active' });
+    // Check if service exists and is active
+    const service = await Services.findById(serviceId);
+    if (!service || service.status !== 'active') {
+      return res.status(404).json({ error: 'Service not found or not active' });
     }
 
     // Check if already applied
     const existingApp = await Application.findOne({
-      job_id: jobId,
+      service_id: serviceId,
       jobseeker_id: req.user.userId
     });
 
     if (existingApp) {
-      return res.status(400).json({ error: 'You have already applied for this job' });
+      return res.status(400).json({ error: 'You have already applied for this service' });
     }
 
     // Create new application
     const application = new Application({
-      job_id: jobId,
+      service_id: serviceId,
       jobseeker_id: req.user.userId,
       resume_filename: resumeFilename,
+      applicant_name: applicantName,
+      applicant_email: applicantEmail,
+      applicant_phone: applicantPhone,
+      applicant_skills: applicantSkills || null,
       cover_letter: coverLetter || null
     });
 
@@ -115,15 +121,15 @@ router.get('/my-applications', authenticateToken, async (req, res) => {
     }
 
     const applications = await Application.find({ jobseeker_id: req.user.userId })
-      .populate('job_id', 'title company location experience')
+      .populate('service_id', 'title company location experience')
       .sort({ applied_date: -1 });
 
     const formattedApplications = applications.map(app => ({
       ...app.toObject(),
-      title: app.job_id?.title,
-      company: app.job_id?.company,
-      location: app.job_id?.location,
-      experience: app.job_id?.experience
+      title: app.service_id?.title,
+      company: app.service_id?.company,
+      location: app.service_id?.location,
+      experience: app.service_id?.experience
     }));
 
     res.json(formattedApplications);
@@ -132,37 +138,38 @@ router.get('/my-applications', authenticateToken, async (req, res) => {
   }
 });
 
-// Get applications for a specific job (recruiter only)
-router.get('/job/:jobId', authenticateToken, async (req, res) => {
+// Get applications for a specific service (recruiter only)
+router.get('/service/:serviceId', authenticateToken, async (req, res) => {
   try {
     if (req.user.userType !== 'recruiter') {
       return res.status(403).json({ error: 'Only recruiters can access this endpoint' });
     }
 
-    const { jobId } = req.params;
+    const { serviceId } = req.params;
 
-    // First verify the job belongs to this recruiter
-    const job = await Job.findById(jobId);
-    if (!job) {
-      return res.status(404).json({ error: 'Job not found' });
+    // First verify the service belongs to this recruiter
+    const service = await Services.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ error: 'Service not found' });
     }
 
-    if (job.recruiter_id.toString() !== req.user.userId) {
-      return res.status(403).json({ error: 'You can only view applications for your own jobs' });
+    if (service.recruiter_id.toString() !== req.user.userId) {
+      return res.status(403).json({ error: 'You can only view applications for your own services' });
     }
 
-    // Get applications for this job with user details
-    const applications = await Application.find({ job_id: jobId })
+    // Get applications for this service with user details
+    const applications = await Application.find({ service_id: serviceId })
       .populate('jobseeker_id', 'full_name email phone location skills experience education')
       .sort({ applied_date: -1 });
 
     const formattedApplications = applications.map(app => ({
       ...app.toObject(),
-      full_name: app.jobseeker_id?.full_name,
-      email: app.jobseeker_id?.email,
-      phone: app.jobseeker_id?.phone,
+      // Use direct application data if available, fallback to user profile data
+      full_name: app.applicant_name || app.jobseeker_id?.full_name,
+      email: app.applicant_email || app.jobseeker_id?.email,
+      phone: app.applicant_phone || app.jobseeker_id?.phone,
+      skills: app.applicant_skills || app.jobseeker_id?.skills,
       user_location: app.jobseeker_id?.location,
-      skills: app.jobseeker_id?.skills,
       user_experience: app.jobseeker_id?.experience,
       education: app.jobseeker_id?.education
     }));
@@ -190,14 +197,14 @@ router.put('/:applicationId/status', authenticateToken, [
     const { applicationId } = req.params;
     const { status } = req.body;
 
-    // Verify the application belongs to a job posted by this recruiter
-    const application = await Application.findById(applicationId).populate('job_id');
+    // Verify the application belongs to a service posted by this recruiter
+    const application = await Application.findById(applicationId).populate('service_id');
 
     if (!application) {
       return res.status(404).json({ error: 'Application not found' });
     }
 
-    if (application.job_id.recruiter_id.toString() !== req.user.userId) {
+    if (application.service_id.recruiter_id.toString() !== req.user.userId) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -210,37 +217,43 @@ router.put('/:applicationId/status', authenticateToken, [
   }
 });
 
-// Get all applications for recruiter's jobs
+// Get all applications for recruiter's services
 router.get('/recruiter/all', authenticateToken, async (req, res) => {
   try {
     if (req.user.userType !== 'recruiter') {
       return res.status(403).json({ error: 'Only recruiters can access this endpoint' });
     }
 
-    // Get all applications for jobs posted by this recruiter
-    const applications = await Application.find({})
-      .populate({
-        path: 'job_id',
-        match: { recruiter_id: req.user.userId },
-        select: 'title company'
-      })
+    // First get all services posted by this recruiter
+    const recruiterServices = await Services.find({ recruiter_id: req.user.userId }).select('_id');
+    const serviceIds = recruiterServices.map(service => service._id);
+
+    console.log('Recruiter services:', serviceIds.length);
+
+    // Get all applications for these services
+    const applications = await Application.find({ service_id: { $in: serviceIds } })
+      .populate('service_id', 'title company')
       .populate('jobseeker_id', 'full_name email phone')
       .sort({ applied_date: -1 });
 
-    // Filter out applications where job_id is null (not recruiter's jobs)
-    const filteredApplications = applications.filter(app => app.job_id !== null);
+    console.log('Found applications:', applications.length);
 
-    const formattedApplications = filteredApplications.map(app => ({
+    const formattedApplications = applications.map(app => ({
       ...app.toObject(),
-      title: app.job_id?.title,
-      company: app.job_id?.company,
-      full_name: app.jobseeker_id?.full_name,
-      email: app.jobseeker_id?.email,
-      phone: app.jobseeker_id?.phone
+      id: app._id,
+      title: app.service_id?.title,
+      company: app.service_id?.company,
+      // Use direct application data if available, fallback to user profile data
+      full_name: app.applicant_name || app.jobseeker_id?.full_name,
+      email: app.applicant_email || app.jobseeker_id?.email,
+      phone: app.applicant_phone || app.jobseeker_id?.phone,
+      skills: app.applicant_skills || app.jobseeker_id?.skills
     }));
 
+    console.log('Formatted applications:', formattedApplications.length);
     res.json(formattedApplications);
   } catch (error) {
+    console.error('Error in /recruiter/all:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -272,9 +285,9 @@ router.get('/resume/:filename', authenticateToken, async (req, res) => {
 
     } else if (req.user.userType === 'recruiter') {
       const application = await Application.findOne({ resume_filename: filename })
-        .populate('job_id');
+        .populate('service_id');
 
-      if (!application || application.job_id.recruiter_id.toString() !== req.user.userId) {
+      if (!application || application.service_id.recruiter_id.toString() !== req.user.userId) {
         return res.status(403).json({ error: 'Access denied' });
       }
       res.download(filePath);

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend Application Modal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .service-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .service-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .service-detail {
+            margin: 5px 0;
+            color: #666;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Frontend Application Modal</h1>
+        <p>This page tests the new application modal functionality without resume requirement.</p>
+        
+        <div id="status" class="status info">
+            Ready to test application modal...
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔑 Step 1: Login as Client</h2>
+        <form id="loginForm">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email</label>
+                <input type="email" id="email" value="client@example.com" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Password</label>
+                <input type="password" id="password" value="password123" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <button type="submit">Login</button>
+            <button type="button" onclick="registerUser()">Register New Client</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>📋 Step 2: Available Services</h2>
+        <button onclick="loadServices()" id="loadServicesBtn">Load Available Services</button>
+        <div id="servicesResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>📝 Step 3: Test Application</h2>
+        <div id="applicationResult"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3002/api';
+        let authToken = null;
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = message;
+        }
+
+        async function registerUser() {
+            try {
+                updateStatus('Registering new client...', 'info');
+                
+                const userData = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    fullName: 'Test Client User',
+                    userType: 'jobseeker'
+                };
+
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    updateStatus('✅ Client registered and logged in successfully!', 'success');
+                    document.getElementById('loadServicesBtn').disabled = false;
+                } else {
+                    updateStatus(`❌ Registration failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Registration error: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                updateStatus('Logging in...', 'info');
+                
+                const loginData = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                };
+
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    updateStatus('✅ Login successful!', 'success');
+                    document.getElementById('loadServicesBtn').disabled = false;
+                } else {
+                    updateStatus(`❌ Login failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Login error: ${error.message}`, 'error');
+            }
+        });
+
+        async function loadServices() {
+            if (!authToken) {
+                updateStatus('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                updateStatus('Loading available services...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/services`);
+                const services = await response.json();
+                
+                if (response.ok) {
+                    updateStatus(`✅ Services loaded successfully! Found ${services.length} services`, 'success');
+                    
+                    let servicesHtml = '';
+                    if (services.length === 0) {
+                        servicesHtml = '<div class="service-card"><div class="service-title">No services available</div></div>';
+                    } else {
+                        services.slice(0, 3).forEach((service, index) => {
+                            servicesHtml += `
+                                <div class="service-card">
+                                    <div class="service-title">${service.title}</div>
+                                    <div class="service-detail"><strong>Company:</strong> ${service.company}</div>
+                                    <div class="service-detail"><strong>Location:</strong> ${service.location}</div>
+                                    <div class="service-detail"><strong>Experience:</strong> ${service.experience}</div>
+                                    <div class="service-detail"><strong>Skills:</strong> ${service.skills}</div>
+                                    <div class="service-detail"><strong>Rate:</strong> ${service.salary_range || 'Not specified'}</div>
+                                    <div class="service-detail"><strong>Type:</strong> ${service.service_type}</div>
+                                    <div style="margin-top: 10px;">
+                                        <button onclick="applyForService('${service._id}', '${service.title}', '${service.company}')">
+                                            Apply for This Service
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    document.getElementById('servicesResult').innerHTML = servicesHtml;
+                } else {
+                    updateStatus(`❌ Failed to load services: ${services.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Services loading error: ${error.message}`, 'error');
+            }
+        }
+
+        async function applyForService(serviceId, title, company) {
+            if (!authToken) {
+                updateStatus('❌ Please login first', 'error');
+                return;
+            }
+
+            // Show application form
+            const applicationHtml = `
+                <div style="border: 2px solid #007bff; border-radius: 8px; padding: 20px; background: #f8f9fa;">
+                    <h3>Apply for: ${title}</h3>
+                    <p><strong>Company:</strong> ${company}</p>
+                    
+                    <form id="applicationForm">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Full Name *</label>
+                            <input type="text" id="applicantName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Enter your full name">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email Address *</label>
+                            <input type="email" id="applicantEmail" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Enter your email">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Phone Number *</label>
+                            <input type="tel" id="applicantPhone" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Enter your phone number">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Relevant Skills/Experience</label>
+                            <input type="text" id="applicantSkills" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="e.g., JavaScript, React, 3 years experience">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Cover Letter/Message</label>
+                            <textarea id="coverLetter" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Tell them why you're interested..."></textarea>
+                        </div>
+                        
+                        <button type="submit" style="background: #28a745;">Submit Application</button>
+                        <button type="button" onclick="cancelApplication()" style="background: #6c757d;">Cancel</button>
+                    </form>
+                </div>
+            `;
+            
+            document.getElementById('applicationResult').innerHTML = applicationHtml;
+            
+            document.getElementById('applicationForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitApplication(serviceId);
+            });
+        }
+
+        async function submitApplication(serviceId) {
+            try {
+                updateStatus('Submitting application...', 'info');
+                
+                const applicationData = {
+                    serviceId: serviceId,
+                    applicantName: document.getElementById('applicantName').value,
+                    applicantEmail: document.getElementById('applicantEmail').value,
+                    applicantPhone: document.getElementById('applicantPhone').value,
+                    applicantSkills: document.getElementById('applicantSkills').value,
+                    coverLetter: document.getElementById('coverLetter').value
+                };
+
+                const response = await fetch(`${API_BASE_URL}/applications`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(applicationData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    updateStatus('✅ Application submitted successfully!', 'success');
+                    document.getElementById('applicationResult').innerHTML = `
+                        <div style="border: 2px solid #28a745; border-radius: 8px; padding: 20px; background: #d4edda; color: #155724;">
+                            <h3>✅ Application Submitted Successfully!</h3>
+                            <p><strong>Application ID:</strong> ${data.applicationId}</p>
+                            <p>Your application has been sent to the service provider. They will contact you if interested.</p>
+                            <button onclick="loadServices()">Apply for Another Service</button>
+                        </div>
+                    `;
+                } else {
+                    updateStatus(`❌ Application failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Application error: ${error.message}`, 'error');
+            }
+        }
+
+        function cancelApplication() {
+            document.getElementById('applicationResult').innerHTML = '';
+            updateStatus('Application cancelled', 'info');
+        }
+
+        // Auto-load services if already logged in
+        window.addEventListener('load', () => {
+            updateStatus('Ready to test application modal functionality', 'info');
+        });
+    </script>
+</body>
+</html>

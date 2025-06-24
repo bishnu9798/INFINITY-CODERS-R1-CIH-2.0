@@ -43,49 +43,86 @@ export const authAPI = {
   }
 };
 
-// Jobs API with real backend implementation
-export const jobsAPI = {
+// Services API with real backend implementation
+export const servicesAPI = {
   getAll: async (params = {}) => {
-    return api.get('/jobs', { params });
+    return api.get('/services', { params });
   },
 
   getById: async (id) => {
-    return api.get(`/jobs/${id}`);
+    return api.get(`/services/${id}`);
   },
 
-  create: async (jobData) => {
-    return api.post('/jobs', jobData);
+  create: async (serviceData) => {
+    // Check if serviceData is FormData (for file uploads)
+    const headers = serviceData instanceof FormData
+      ? { 'Content-Type': 'multipart/form-data' }
+      : { 'Content-Type': 'application/json' };
+
+    return api.post('/services', serviceData, { headers });
   },
 
-  update: async (id, jobData) => {
-    return api.put(`/jobs/${id}`, jobData);
+  update: async (id, serviceData) => {
+    return api.put(`/services/${id}`, serviceData);
   },
 
   delete: async (id) => {
-    return api.delete(`/jobs/${id}`);
+    return api.delete(`/services/${id}`);
   },
 
+  getMyServices: async () => {
+    return api.get('/services/recruiter/my-services');
+  },
+
+  // Backward compatibility alias
   getMyJobs: async () => {
-    return api.get('/jobs/recruiter/my-jobs');
+    return api.get('/services/recruiter/my-services');
+  },
+
+  downloadResume: async (filename) => {
+    return api.get(`/services/resume/${filename}`, {
+      responseType: 'blob'
+    });
   }
 };
 
+// Keep jobsAPI for backward compatibility (deprecated)
+export const jobsAPI = servicesAPI;
+
 // Applications API with real backend implementation
 export const applicationsAPI = {
-  apply: async (formData) => {
-    return api.post('/applications', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  apply: async (applicationData) => {
+    // Check if it's FormData (for file uploads) or regular object (for direct application)
+    const isFormData = applicationData instanceof FormData;
+
+    if (isFormData) {
+      // Legacy file upload approach
+      return api.post('/applications', applicationData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } else {
+      // New direct application approach
+      return api.post('/applications', applicationData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
   },
 
   getMyApplications: async () => {
     return api.get('/applications/my-applications');
   },
 
+  getServiceApplications: async (serviceId) => {
+    return api.get(`/applications/service/${serviceId}`);
+  },
+
+  // Keep for backward compatibility
   getJobApplications: async (jobId) => {
-    return api.get(`/applications/job/${jobId}`);
+    return api.get(`/applications/service/${jobId}`);
   },
 
   updateStatus: async (applicationId, status) => {

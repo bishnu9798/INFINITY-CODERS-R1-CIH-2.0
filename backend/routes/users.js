@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User.js');
-const Job = require('../models/Job.js');
+const Services = require('../models/Services.js');
 const Application = require('../models/Application.js');
 const { authenticateToken } = require('../middleware/auth.js');
 
@@ -80,7 +80,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
         }
       ]);
 
-      const totalActiveJobs = await Job.countDocuments({ status: 'active' });
+      const totalActiveServices = await Services.countDocuments({ status: 'active' });
 
       const stats = applicationStats[0] || {
         total_applications: 0,
@@ -92,21 +92,21 @@ router.get('/stats', authenticateToken, async (req, res) => {
 
       res.json({
         ...stats,
-        total_active_jobs: totalActiveJobs
+        total_active_services: totalActiveServices
       });
 
     } else if (req.user.userType === 'recruiter') {
       // Get recruiter statistics using MongoDB aggregation
       const mongoose = require('mongoose');
 
-      const jobStats = await Job.aggregate([
+      const serviceStats = await Services.aggregate([
         { $match: { recruiter_id: new mongoose.Types.ObjectId(req.user.userId) } },
         {
           $group: {
             _id: null,
-            total_jobs_posted: { $sum: 1 },
-            active_jobs: { $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] } },
-            closed_jobs: { $sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] } }
+            total_services_posted: { $sum: 1 },
+            active_services: { $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] } },
+            closed_services: { $sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] } }
           }
         }
       ]);
@@ -114,28 +114,28 @@ router.get('/stats', authenticateToken, async (req, res) => {
       const applicationCount = await Application.aggregate([
         {
           $lookup: {
-            from: 'jobs',
-            localField: 'job_id',
+            from: 'services',
+            localField: 'service_id',
             foreignField: '_id',
-            as: 'job'
+            as: 'service'
           }
         },
-        { $unwind: '$job' },
-        { $match: { 'job.recruiter_id': new mongoose.Types.ObjectId(req.user.userId) } },
+        { $unwind: '$service' },
+        { $match: { 'service.recruiter_id': new mongoose.Types.ObjectId(req.user.userId) } },
         { $count: 'total_applications_received' }
       ]);
 
       const statusBreakdown = await Application.aggregate([
         {
           $lookup: {
-            from: 'jobs',
-            localField: 'job_id',
+            from: 'services',
+            localField: 'service_id',
             foreignField: '_id',
-            as: 'job'
+            as: 'service'
           }
         },
-        { $unwind: '$job' },
-        { $match: { 'job.recruiter_id': new mongoose.Types.ObjectId(req.user.userId) } },
+        { $unwind: '$service' },
+        { $match: { 'service.recruiter_id': new mongoose.Types.ObjectId(req.user.userId) } },
         {
           $group: {
             _id: '$status',
@@ -144,10 +144,10 @@ router.get('/stats', authenticateToken, async (req, res) => {
         }
       ]);
 
-      const stats = jobStats[0] || {
-        total_jobs_posted: 0,
-        active_jobs: 0,
-        closed_jobs: 0
+      const stats = serviceStats[0] || {
+        total_services_posted: 0,
+        active_services: 0,
+        closed_services: 0
       };
 
       const statusBreakdownObj = {};

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { authAPI, jobsAPI, applicationsAPI, usersAPI } from './services/api-mock-backup';
+import { authAPI, jobsAPI, applicationsAPI, usersAPI } from './services/api';
 import LandingPage from './components/LandingPage';
 import AdvancedJobSearch from './components/AdvancedJobSearch';
 import EnhancedJobCard from './components/EnhancedJobCard';
@@ -62,6 +62,17 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [showClientInfoList, setShowClientInfoList] = useState(false);
+
+  // Application modal state
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [selectedServiceForApplication, setSelectedServiceForApplication] = useState(null);
+  const [applicationFormData, setApplicationFormData] = useState({
+    applicantName: '',
+    applicantEmail: '',
+    applicantPhone: '',
+    applicantSkills: '',
+    coverLetter: ''
+  });
 
   // Load initial data and check authentication
   useEffect(() => {
@@ -153,8 +164,14 @@ function App() {
 
   const loadRecruiterJobs = async () => {
     try {
-      const response = await jobsAPI.getMyJobs();
-      console.log('Recruiter jobs loaded:', response.data);
+      console.log('🔄 Loading recruiter services...');
+      console.log('🔑 Current user:', user);
+      console.log('🔑 Auth token exists:', !!localStorage.getItem('token'));
+
+      const response = await jobsAPI.getMyServices();
+      console.log('✅ Recruiter services loaded:', response.data);
+      console.log('📊 Number of services:', response.data.length);
+
       // Convert MongoDB _id to id for frontend compatibility, but keep original _id for backend operations
       const jobsWithId = response.data.map(job => ({
         ...job,
@@ -162,10 +179,13 @@ function App() {
         _id: job._id, // Keep original _id for backend operations
         skills: typeof job.skills === 'string' ? job.skills.split(',').map(s => s.trim()) : job.skills || []
       }));
-      console.log('Jobs with ID mapping:', jobsWithId.map(job => ({ id: job.id, _id: job._id, title: job.title })));
+      console.log('📊 Services with IDs:', jobsWithId.map(job => ({ id: job.id, _id: job._id, title: job.title })));
       setRecruiterJobs(jobsWithId);
+      console.log('✅ Recruiter services state updated');
     } catch (error) {
-      console.error('Error loading recruiter jobs:', error);
+      console.error('❌ Error loading recruiter services:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
     }
   };
 
@@ -313,9 +333,11 @@ function App() {
       setLoading(true);
       setError('');
 
-      console.log('Attempting login with:', { email, password: '***' });
+      console.log('🔄 Attempting login with:', { email, password: '***' });
+      console.log('🌐 API Base URL:', 'http://localhost:3002/api');
+
       const response = await authAPI.login(email, password);
-      console.log('Login response:', response.data);
+      console.log('✅ Login response received:', response.data);
 
       const { token, user: userData } = response.data;
 
@@ -343,9 +365,23 @@ function App() {
         loadRecruiterJobs();
       }
     } catch (error) {
-      console.error('Login error:', error);
-      console.error('Error response:', error.response?.data);
-      setError(error.response?.data?.error || 'Login failed');
+      console.error('❌ Login error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error message:', error.message);
+
+      let errorMessage = 'Login failed';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message.includes('Network Error')) {
+        errorMessage = 'Network error - cannot connect to server. Please check if the server is running.';
+      } else if (error.message.includes('CORS')) {
+        errorMessage = 'CORS error - server configuration issue.';
+      } else {
+        errorMessage = error.message || 'Login failed';
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -356,9 +392,11 @@ function App() {
       setLoading(true);
       setError('');
 
-      console.log('Attempting registration with data:', userData);
+      console.log('🔄 Attempting registration with data:', userData);
+      console.log('🌐 API Base URL:', 'http://localhost:3002/api');
+
       const response = await authAPI.register(userData);
-      console.log('Registration response:', response.data);
+      console.log('✅ Registration response received:', response.data);
 
       const { token, user: newUser } = response.data;
 
@@ -383,14 +421,20 @@ function App() {
         loadRecruiterJobs();
       }
     } catch (error) {
-      console.error('Registration error:', error);
-      console.error('Error response:', error.response?.data);
+      console.error('❌ Registration error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error message:', error.message);
 
       let errorMessage = 'Registration failed';
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       } else if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
         errorMessage = error.response.data.errors.map(err => err.msg).join(', ');
+      } else if (error.message.includes('Network Error')) {
+        errorMessage = 'Network error - cannot connect to server. Please check if the server is running.';
+      } else if (error.message.includes('CORS')) {
+        errorMessage = 'CORS error - server configuration issue.';
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -419,33 +463,69 @@ function App() {
     loadJobs(); // Load public jobs after logout
   };
 
-  const handleJobApply = async (jobId) => {
-    if (!resume) {
-      alert("Please upload your resume first by going to the Resume tab");
+  const handleJobApply = async (serviceId) => {
+    // Open application modal instead of direct application
+    setSelectedServiceForApplication(serviceId);
+    setShowApplicationModal(true);
+  };
+
+  const handleApplicationSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedServiceForApplication) {
+      alert('No service selected for application');
       return;
     }
 
-    console.log('Applying for job:', jobId, 'with resume:', resume.name);
+    // Validate required fields
+    if (!applicationFormData.applicantName || !applicationFormData.applicantEmail || !applicationFormData.applicantPhone) {
+      alert('Please fill in all required fields (Name, Email, Phone)');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(applicationFormData.applicantEmail)) {
+      alert('Please enter a valid email address');
+      return;
+    }
 
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('jobId', jobId);
-      formData.append('resume', resume);
 
-      console.log('FormData created, sending application...');
-      const response = await applicationsAPI.apply(formData);
+      const applicationData = {
+        serviceId: selectedServiceForApplication,
+        applicantName: applicationFormData.applicantName,
+        applicantEmail: applicationFormData.applicantEmail,
+        applicantPhone: applicationFormData.applicantPhone,
+        applicantSkills: applicationFormData.applicantSkills,
+        coverLetter: applicationFormData.coverLetter
+      };
+
+      console.log('Submitting application:', applicationData);
+      const response = await applicationsAPI.apply(applicationData);
       console.log('Application response:', response.data);
 
-      alert("Successfully applied to the job!");
-      loadMyApplications(); // Reload applications
-      // Also reload recruiter applications if there are any recruiters logged in
-      // This is for real-time updates in case multiple users are using the system
+      alert("Successfully applied for the service!");
+
+      // Reset form and close modal
+      setApplicationFormData({
+        applicantName: '',
+        applicantEmail: '',
+        applicantPhone: '',
+        applicantSkills: '',
+        coverLetter: ''
+      });
+      setShowApplicationModal(false);
+      setSelectedServiceForApplication(null);
+
+      // Reload applications
+      loadMyApplications();
     } catch (error) {
       console.error('Application error:', error);
       console.error('Error response:', error.response?.data);
 
-      let errorMessage = 'Failed to apply for job';
+      let errorMessage = 'Failed to apply for service';
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       } else if (error.response?.data?.errors) {
@@ -458,6 +538,14 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleApplicationFormChange = (e) => {
+    const { name, value } = e.target;
+    setApplicationFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleResumeUpload = (e) => {
@@ -511,34 +599,33 @@ function App() {
       return;
     }
 
-    const serviceData = {
-      title: form.title.value,
-      mobile: mobileValue,
-      email: emailValue,
-      company: form.company.value,
-      location: form.location.value,
-      experience: form.experience.value,
-      skills: form.skills.value.split(',').map(skill => skill.trim()),
-      description: form.description.value,
-      salaryRange: form.salaryRange?.value || '',
-      jobType: form.jobType?.value || 'hourly',
-      serviceType: 'freelancing',
-      resumeFile: form.resume?.files[0] || null
-    };
+    // Basic validation
+    if (!form.title.value || !form.company.value || !form.location.value || !form.experience.value || !form.skills.value || !form.description.value) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', form.title.value);
+    formData.append('mobile', mobileValue);
+    formData.append('email', emailValue);
+    formData.append('company', form.company.value);
+    formData.append('location', form.location.value);
+    formData.append('experience', form.experience.value);
+    formData.append('skills', form.skills.value);
+    formData.append('description', form.description.value);
+    formData.append('salaryRange', form.salaryRange?.value || '');
+    formData.append('serviceType', form.jobType?.value || 'full-time');
+
+    // Add resume file if selected
+    if (form.resume?.files[0]) {
+      formData.append('resume', form.resume.files[0]);
+    }
 
     try {
       setLoading(true);
-
-      // If there's a resume file, we could handle file upload here
-      // For now, we'll just include the file info in the service data
-      if (serviceData.resumeFile) {
-        serviceData.resumeFileName = serviceData.resumeFile.name;
-        serviceData.resumeFileSize = serviceData.resumeFile.size;
-        // In a real implementation, you'd upload the file to a server
-        console.log('Resume file selected:', serviceData.resumeFile);
-      }
-
-      await jobsAPI.create(serviceData);
+      console.log('Creating service with FormData...');
+      await jobsAPI.create(formData);
       form.reset();
       // Clear file info display
       const fileInfo = form.querySelector('.file-info');
@@ -1219,6 +1306,153 @@ function App() {
     );
   };
 
+  const renderApplicationModal = () => {
+    if (!showApplicationModal || !selectedServiceForApplication) return null;
+
+    // Find the selected service details
+    const selectedService = jobs.find(job => job.id === selectedServiceForApplication);
+
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+          <div className="mt-3">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Apply for Service</h3>
+              <button
+                onClick={() => {
+                  setShowApplicationModal(false);
+                  setSelectedServiceForApplication(null);
+                  setApplicationFormData({
+                    applicantName: '',
+                    applicantEmail: '',
+                    applicantPhone: '',
+                    applicantSkills: '',
+                    coverLetter: ''
+                  });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {selectedService && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold text-gray-900">{selectedService.title}</h4>
+                <p className="text-gray-600">{selectedService.company}</p>
+                <p className="text-sm text-gray-500">{selectedService.location}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleApplicationSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="applicantName"
+                  value={applicationFormData.applicantName}
+                  onChange={handleApplicationFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="applicantEmail"
+                  value={applicationFormData.applicantEmail}
+                  onChange={handleApplicationFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your email address"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="applicantPhone"
+                  value={applicationFormData.applicantPhone}
+                  onChange={handleApplicationFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Relevant Skills/Experience
+                </label>
+                <input
+                  type="text"
+                  name="applicantSkills"
+                  value={applicationFormData.applicantSkills}
+                  onChange={handleApplicationFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., JavaScript, React, 3 years experience"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cover Letter/Message
+                </label>
+                <textarea
+                  name="coverLetter"
+                  value={applicationFormData.coverLetter}
+                  onChange={handleApplicationFormChange}
+                  rows="4"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Tell the freelancer why you're interested in their service and what you're looking for..."
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowApplicationModal(false);
+                    setSelectedServiceForApplication(null);
+                    setApplicationFormData({
+                      applicantName: '',
+                      applicantEmail: '',
+                      applicantPhone: '',
+                      applicantSkills: '',
+                      coverLetter: ''
+                    });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition-colors"
+                >
+                  {loading ? 'Submitting...' : 'Submit Application'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderRecruiterJobs = () => (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">YOUR FREELANCING SERVICE</h2>
@@ -1551,17 +1785,28 @@ function App() {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex space-x-2">
-                        {app.resume_filename && (
-                          <button
-                            onClick={() => handleDownloadResume(app.resume_filename)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Download Resume
-                          </button>
+                      <div className="flex flex-col space-y-1">
+                        <div className="flex space-x-2">
+                          {app.resume_filename && (
+                            <button
+                              onClick={() => handleDownloadResume(app.resume_filename)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              📄 Download Resume
+                            </button>
+                          )}
+                          <span className="text-gray-600">📞 {app.phone || 'N/A'}</span>
+                        </div>
+                        {app.skills && (
+                          <div className="text-xs text-gray-500">
+                            <strong>Skills:</strong> {app.skills}
+                          </div>
                         )}
-                        <span className="text-gray-400">|</span>
-                        <span className="text-gray-600">Phone: {app.phone || 'N/A'}</span>
+                        {app.cover_letter && (
+                          <div className="text-xs text-gray-500 max-w-xs truncate" title={app.cover_letter}>
+                            <strong>Message:</strong> {app.cover_letter}
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -1582,11 +1827,13 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', { isLogin, formData });
+    console.log('🚀 Form submitted:', { isLogin, formData });
+    console.log('🔍 Current loading state:', loading);
+    console.log('🔍 Current error state:', error);
 
     // Prevent double submission
     if (loading) {
-      console.log('Form submission already in progress, ignoring...');
+      console.log('⚠️ Form submission already in progress, ignoring...');
       return;
     }
 
@@ -1645,7 +1892,7 @@ function App() {
       ...formData,
       [e.target.name]: e.target.value
     };
-    console.log('Form data updated:', newFormData);
+    console.log('📝 Form data updated:', newFormData);
     setFormData(newFormData);
   };
 
@@ -1778,6 +2025,29 @@ function App() {
                   className="text-blue-600 hover:text-blue-500 text-sm"
                 >
                   {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                </button>
+              </div>
+
+              {/* Debug Test Button */}
+              <div className="text-center mt-4 p-4 bg-gray-100 rounded">
+                <p className="text-sm text-gray-600 mb-2">Debug Test:</p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('🧪 Testing direct API call...');
+                    try {
+                      const response = await fetch('http://localhost:3002/api/health');
+                      const data = await response.json();
+                      console.log('✅ Direct API test successful:', data);
+                      alert('API test successful! Check console for details.');
+                    } catch (error) {
+                      console.error('❌ Direct API test failed:', error);
+                      alert('API test failed! Check console for details.');
+                    }
+                  }}
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm"
+                >
+                  Test API Connection
                 </button>
               </div>
             </form>
@@ -2117,6 +2387,7 @@ function App() {
         {activeTab === 'recruiter-applications' && renderRecruiterApplications()}
       </main>
       {renderEditJobModal()}
+      {renderApplicationModal()}
     </div>
   );
 }

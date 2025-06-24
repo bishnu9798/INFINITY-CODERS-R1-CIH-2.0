@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const applicationSchema = new mongoose.Schema({
-  job_id: {
+  service_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Job',
+    ref: 'Services',
     required: true
   },
   jobseeker_id: {
@@ -11,7 +11,26 @@ const applicationSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  // Resume file (optional - for backward compatibility)
   resume_filename: {
+    type: String,
+    trim: true
+  },
+  // Direct application fields (new approach)
+  applicant_name: {
+    type: String,
+    trim: true
+  },
+  applicant_email: {
+    type: String,
+    trim: true,
+    lowercase: true
+  },
+  applicant_phone: {
+    type: String,
+    trim: true
+  },
+  applicant_skills: {
     type: String,
     trim: true
   },
@@ -35,12 +54,12 @@ const applicationSchema = new mongoose.Schema({
   }
 });
 
-// Compound index to ensure unique application per job per jobseeker
-applicationSchema.index({ job_id: 1, jobseeker_id: 1 }, { unique: true });
+// Compound index to ensure unique application per service per jobseeker
+applicationSchema.index({ service_id: 1, jobseeker_id: 1 }, { unique: true });
 
 // Other indexes for performance
 applicationSchema.index({ jobseeker_id: 1 });
-applicationSchema.index({ job_id: 1 });
+applicationSchema.index({ service_id: 1 });
 applicationSchema.index({ applied_date: -1 });
 applicationSchema.index({ status: 1 });
 

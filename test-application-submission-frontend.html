@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Application Submission - Frontend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .service-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Application Submission (Frontend)</h1>
+        <p>This page tests the complete application submission flow after fixing the database indexes.</p>
+        
+        <div id="status" class="status info">
+            Ready to test application submission...
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="container">
+            <h2>🔑 Step 1: Setup Test Data</h2>
+            <button onclick="setupTestData()">Setup Test Data</button>
+            <div id="setupResult"></div>
+        </div>
+
+        <div class="container">
+            <h2>👤 Step 2: Login as Client</h2>
+            <button onclick="loginAsClient()" id="loginBtn" disabled>Login as Client</button>
+            <div id="loginResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📋 Step 3: Available Services</h2>
+        <button onclick="loadServices()" id="loadServicesBtn" disabled>Load Services</button>
+        <div id="servicesResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>📝 Step 4: Submit Application</h2>
+        <div id="applicationForm" style="display: none;">
+            <form id="appForm">
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="applicantName" value="Test Client" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" name="applicantEmail" value="client@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input type="tel" name="applicantPhone" value="+1-555-123-4567" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Skills</label>
+                        <input type="text" name="applicantSkills" value="JavaScript, React, Node.js">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Cover Letter</label>
+                    <textarea name="coverLetter" rows="4">I am very interested in this service and would like to apply.</textarea>
+                </div>
+                <button type="submit">Submit Application</button>
+            </form>
+        </div>
+        <div id="applicationResult"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3002/api';
+        let authToken = null;
+        let testServiceId = null;
+        let clientToken = null;
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = message;
+        }
+
+        async function setupTestData() {
+            try {
+                updateStatus('Setting up test data...', 'info');
+                
+                // Register recruiter and create service
+                const recruiterData = {
+                    email: `test-recruiter-${Date.now()}@example.com`,
+                    password: 'password123',
+                    fullName: 'Test Recruiter',
+                    userType: 'recruiter',
+                    companyName: 'Test Company'
+                };
+
+                const recruiterResponse = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(recruiterData)
+                });
+
+                const recruiterResult = await recruiterResponse.json();
+                if (!recruiterResponse.ok) throw new Error(recruiterResult.error);
+
+                // Create service
+                const formData = new FormData();
+                formData.append('title', 'Frontend Test Service');
+                formData.append('company', 'Test Company');
+                formData.append('location', 'Remote');
+                formData.append('experience', '2-4 years');
+                formData.append('skills', 'JavaScript, React');
+                formData.append('description', 'Test service for frontend application');
+                formData.append('mobile', '+1-555-123-4567');
+                formData.append('email', 'service@example.com');
+                formData.append('serviceType', 'hourly');
+
+                const serviceResponse = await fetch(`${API_BASE_URL}/services`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${recruiterResult.token}` },
+                    body: formData
+                });
+
+                const serviceResult = await serviceResponse.json();
+                if (!serviceResponse.ok) throw new Error(serviceResult.error);
+
+                testServiceId = serviceResult.serviceId;
+
+                // Register client
+                const clientData = {
+                    email: `test-client-${Date.now()}@example.com`,
+                    password: 'password123',
+                    fullName: 'Test Client',
+                    userType: 'jobseeker'
+                };
+
+                const clientResponse = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(clientData)
+                });
+
+                const clientResult = await clientResponse.json();
+                if (!clientResponse.ok) throw new Error(clientResult.error);
+
+                clientToken = clientResult.token;
+
+                document.getElementById('setupResult').innerHTML = `
+                    <div class="status success">
+                        ✅ Test data setup complete!<br>
+                        📊 Service ID: ${testServiceId}<br>
+                        👤 Client Email: ${clientData.email}
+                    </div>
+                `;
+
+                document.getElementById('loginBtn').disabled = false;
+                updateStatus('Test data setup complete', 'success');
+
+            } catch (error) {
+                document.getElementById('setupResult').innerHTML = `
+                    <div class="status error">❌ Setup failed: ${error.message}</div>
+                `;
+                updateStatus('Setup failed', 'error');
+            }
+        }
+
+        async function loginAsClient() {
+            try {
+                authToken = clientToken;
+                
+                document.getElementById('loginResult').innerHTML = `
+                    <div class="status success">✅ Logged in as client</div>
+                `;
+                
+                document.getElementById('loadServicesBtn').disabled = false;
+                updateStatus('Client login successful', 'success');
+
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = `
+                    <div class="status error">❌ Login failed: ${error.message}</div>
+                `;
+                updateStatus('Login failed', 'error');
+            }
+        }
+
+        async function loadServices() {
+            try {
+                updateStatus('Loading services...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/services`);
+                const services = await response.json();
+                
+                if (!response.ok) throw new Error(services.error);
+
+                const testService = services.find(s => s._id === testServiceId);
+                
+                if (testService) {
+                    document.getElementById('servicesResult').innerHTML = `
+                        <div class="service-card">
+                            <h3>${testService.title}</h3>
+                            <p><strong>Company:</strong> ${testService.company}</p>
+                            <p><strong>Location:</strong> ${testService.location}</p>
+                            <p><strong>Skills:</strong> ${testService.skills}</p>
+                            <p><strong>Description:</strong> ${testService.description}</p>
+                            <button onclick="showApplicationForm('${testService._id}', '${testService.title}')">
+                                Apply for This Service
+                            </button>
+                        </div>
+                    `;
+                    updateStatus('Services loaded successfully', 'success');
+                } else {
+                    throw new Error('Test service not found');
+                }
+
+            } catch (error) {
+                document.getElementById('servicesResult').innerHTML = `
+                    <div class="status error">❌ Failed to load services: ${error.message}</div>
+                `;
+                updateStatus('Failed to load services', 'error');
+            }
+        }
+
+        function showApplicationForm(serviceId, serviceTitle) {
+            document.getElementById('applicationForm').style.display = 'block';
+            document.getElementById('applicationForm').setAttribute('data-service-id', serviceId);
+            document.getElementById('applicationForm').setAttribute('data-service-title', serviceTitle);
+            
+            updateStatus(`Ready to apply for: ${serviceTitle}`, 'info');
+        }
+
+        document.getElementById('appForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!authToken) {
+                updateStatus('Please login first', 'error');
+                return;
+            }
+
+            const serviceId = document.getElementById('applicationForm').getAttribute('data-service-id');
+            const serviceTitle = document.getElementById('applicationForm').getAttribute('data-service-title');
+
+            try {
+                updateStatus('Submitting application...', 'info');
+                
+                const formData = new FormData(e.target);
+                const applicationData = {
+                    serviceId: serviceId,
+                    applicantName: formData.get('applicantName'),
+                    applicantEmail: formData.get('applicantEmail'),
+                    applicantPhone: formData.get('applicantPhone'),
+                    applicantSkills: formData.get('applicantSkills'),
+                    coverLetter: formData.get('coverLetter')
+                };
+
+                console.log('Submitting application:', applicationData);
+
+                const response = await fetch(`${API_BASE_URL}/applications`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(applicationData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('applicationResult').innerHTML = `
+                        <div class="status success">
+                            ✅ Application submitted successfully!<br>
+                            📊 Application ID: ${result.applicationId}<br>
+                            🎯 Service: ${serviceTitle}
+                        </div>
+                    `;
+                    updateStatus('Application submitted successfully!', 'success');
+                    
+                    // Reset form
+                    e.target.reset();
+                    document.getElementById('applicationForm').style.display = 'none';
+                } else {
+                    throw new Error(result.error || 'Application submission failed');
+                }
+
+            } catch (error) {
+                document.getElementById('applicationResult').innerHTML = `
+                    <div class="status error">❌ Application failed: ${error.message}</div>
+                `;
+                updateStatus('Application submission failed', 'error');
+                console.error('Application error:', error);
+            }
+        });
+
+        // Auto-start
+        window.addEventListener('load', () => {
+            updateStatus('Ready to test application submission', 'info');
+        });
+    </script>
+</body>
+</html>

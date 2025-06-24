@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Atlas Real-Time Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .events {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .event {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+            background: white;
+        }
+        .event.user { border-left-color: #28a745; }
+        .event.services { border-left-color: #ffc107; }
+        .event.application { border-left-color: #dc3545; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍃 MongoDB Atlas Real-Time Test</h1>
+        <p>Testing real-time data updates from MongoDB Atlas with change streams and WebSocket.</p>
+        
+        <div id="connectionStatus" class="status disconnected">
+            🔌 Disconnected from WebSocket
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be populated here -->
+        </div>
+
+        <div>
+            <button onclick="connectWebSocket()">Connect WebSocket</button>
+            <button onclick="disconnectWebSocket()">Disconnect</button>
+            <button onclick="refreshStats()">Refresh Stats</button>
+            <button onclick="clearEvents()">Clear Events</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📊 Real-Time Events</h2>
+        <div id="events" class="events">
+            <div class="event">Waiting for real-time events...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🧪 Test Actions</h2>
+        <p>Use these buttons to test real-time updates by making API calls:</p>
+        <button onclick="createTestUser()">Create Test User</button>
+        <button onclick="createTestService()">Create Test Service</button>
+        <button onclick="createTestApplication()">Create Test Application</button>
+    </div>
+
+    <script>
+        let ws = null;
+        let stats = {};
+
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (connected) {
+                statusEl.className = 'status connected';
+                statusEl.innerHTML = '✅ Connected to WebSocket';
+            } else {
+                statusEl.className = 'status disconnected';
+                statusEl.innerHTML = '🔌 Disconnected from WebSocket';
+            }
+        }
+
+        function connectWebSocket() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                addEvent('⚠️ WebSocket already connected');
+                return;
+            }
+
+            ws = new WebSocket('ws://localhost:3002/ws');
+
+            ws.onopen = function() {
+                updateConnectionStatus(true);
+                addEvent('✅ WebSocket connected');
+                refreshStats();
+            };
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
+
+            ws.onclose = function() {
+                updateConnectionStatus(false);
+                addEvent('🔌 WebSocket disconnected');
+            };
+
+            ws.onerror = function(error) {
+                addEvent('❌ WebSocket error: ' + error);
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+
+        function handleWebSocketMessage(data) {
+            switch(data.type) {
+                case 'connection':
+                    addEvent('🎉 ' + data.message);
+                    break;
+                case 'stats':
+                    stats = data.data;
+                    updateStatsDisplay();
+                    addEvent('📊 Stats updated');
+                    break;
+                case 'user_change':
+                    addEvent(`👤 User ${data.operation}: ${JSON.stringify(data.data)}`, 'user');
+                    refreshStats();
+                    break;
+                case 'services_change':
+                    addEvent(`💼 Services ${data.operation}: ${JSON.stringify(data.data)}`, 'services');
+                    refreshStats();
+                    break;
+                case 'application_change':
+                    addEvent(`📄 Application ${data.operation}: ${JSON.stringify(data.data)}`, 'application');
+                    refreshStats();
+                    break;
+                default:
+                    addEvent('📨 ' + JSON.stringify(data));
+            }
+        }
+
+        function refreshStats() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'get_stats' }));
+            } else {
+                // Fallback to HTTP request
+                fetch('http://localhost:3002/api/stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        stats = data;
+                        updateStatsDisplay();
+                    })
+                    .catch(error => addEvent('❌ Error fetching stats: ' + error));
+            }
+        }
+
+        function updateStatsDisplay() {
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.users?.total || 0}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.users?.jobseekers || 0}</div>
+                    <div class="stat-label">Job Seekers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.users?.recruiters || 0}</div>
+                    <div class="stat-label">Recruiters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.services?.total || 0}</div>
+                    <div class="stat-label">Total Services</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.services?.active || 0}</div>
+                    <div class="stat-label">Active Services</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.applications?.total || 0}</div>
+                    <div class="stat-label">Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.connectedClients || 0}</div>
+                    <div class="stat-label">Connected Clients</div>
+                </div>
+            `;
+        }
+
+        function addEvent(message, type = '') {
+            const eventsEl = document.getElementById('events');
+            const eventEl = document.createElement('div');
+            eventEl.className = `event ${type}`;
+            eventEl.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            eventsEl.appendChild(eventEl);
+            eventsEl.scrollTop = eventsEl.scrollHeight;
+        }
+
+        function clearEvents() {
+            document.getElementById('events').innerHTML = '<div class="event">Events cleared...</div>';
+        }
+
+        // Test functions
+        function createTestUser() {
+            const userData = {
+                email: `test${Date.now()}@example.com`,
+                password: 'password123',
+                user_type: 'jobseeker',
+                full_name: 'Test User ' + Date.now()
+            };
+
+            fetch('http://localhost:3002/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => addEvent('✅ Test user creation requested'))
+            .catch(error => addEvent('❌ Error creating user: ' + error));
+        }
+
+        function createTestService() {
+            addEvent('ℹ️ Service creation requires authentication - check server logs for change stream events');
+        }
+
+        function createTestApplication() {
+            addEvent('ℹ️ Application creation requires authentication - check server logs for change stream events');
+        }
+
+        // Auto-connect on page load
+        window.onload = function() {
+            refreshStats();
+            setTimeout(connectWebSocket, 1000);
+        };
+    </script>
+</body>
+</html>
