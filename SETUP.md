@@ -117,44 +117,35 @@ The application will automatically connect to our shared development database.
 
 ## 🔍 Troubleshooting
 
-### Common Issues
+### 🚨 **"Network error - cannot connect to server"**
 
-1. **"Cannot connect to MongoDB"**:
-   - Check your internet connection
-   - The shared database requires internet access
-   - Try restarting the backend server
+This is the most common issue. **Quick fix:**
 
-2. **"Port already in use"**:
-   - Kill existing processes: `npx kill-port 3002` and `npx kill-port 5173`
-   - Or restart your computer to clear all ports
+1. **Wait 15 seconds** after starting the application
+2. **Refresh your browser** (Ctrl+F5)
+3. **Check frontend terminal** for the actual port (might be 5174 or 5175)
 
-3. **"Module not found" errors**:
-   - Delete `node_modules` and `package-lock.json` in both root and backend folders
-   - Run `npm install` in both directories again
+### 📋 **Full Troubleshooting Guide**
 
-4. **Frontend not loading**:
-   - Clear browser cache (Ctrl+F5)
-   - Check browser console for errors (F12)
-   - Ensure backend is running first
+For complete troubleshooting steps, see: **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**
 
-5. **"No data showing"**:
-   - This is normal for a fresh setup
-   - Register accounts and create test data
-   - Data is shared across all developers
+### 🔧 **Quick Diagnostic Tools**
 
-### Debug Steps
+```bash
+# Check system health
+check-infinity-workspace.bat
 
-1. **Check Backend Logs**:
-   - Look at the terminal running the backend
-   - Should show: "✅ Connected to MongoDB Atlas"
+# Restart everything
+stop-infinity-workspace.bat
+start-infinity-workspace.bat
+```
 
-2. **Check Frontend Console**:
-   - Open browser developer tools (F12)
-   - Look for any JavaScript errors
+### ⚡ **Most Common Solutions**
 
-3. **Test API Endpoints**:
-   - http://localhost:3002/api/health (should return OK)
-   - http://localhost:3002/api/stats (should show shared database info)
+1. **Backend not ready**: Wait 15 seconds for MongoDB connection
+2. **Wrong port**: Check frontend terminal for actual port number
+3. **Cache issues**: Clear browser cache (Ctrl+Shift+Delete)
+4. **Port conflicts**: Run `stop-infinity-workspace.bat` first
 
 ## 🎉 Success!
 

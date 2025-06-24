@@ -1142,11 +1142,15 @@ function App() {
                   <p className="text-sm text-gray-500">Applied on: {app.appliedDate}</p>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  app.status === 'Applied' ? 'bg-yellow-100 text-yellow-800' :
-                  app.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
-                  'bg-red-100 text-red-800'
+                  app.status === 'applied' ? 'bg-yellow-100 text-yellow-800' :
+                  app.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                  app.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
                 }`}>
-                  {app.status}
+                  {app.status === 'applied' ? 'Applied' :
+                   app.status === 'accepted' ? 'ACCEPTED' :
+                   app.status === 'rejected' ? 'REJECTED' :
+                   app.status}
                 </div>
               </div>
               <div className="mt-4">
@@ -1628,9 +1632,11 @@ function App() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
             <select name="jobType" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="hourly">Hourly Rate</option>
-              <option value="project">Project-Based</option>
-              <option value="contract">Long-term Contract</option>
-              <option value="consultation">Consultation</option>
+              <option value="contract">Project-Based / Contract</option>
+              <option value="part-time">Part-time Work</option>
+              <option value="full-time">Full-time Position</option>
+              <option value="remote">Remote Work</option>
+              <option value="internship">Internship</option>
             </select>
           </div>
 
@@ -1779,9 +1785,8 @@ function App() {
                         disabled={loading}
                       >
                         <option value="applied">Applied</option>
-                        <option value="shortlisted">Shortlisted</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="hired">Hired</option>
+                        <option value="accepted">ACCEPT</option>
+                        <option value="rejected">REJECT</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">

@@ -77,8 +77,15 @@ npm install
 ```
 
 ### Step 3: Start Application
+
+#### Option 1: One-Click Start (Recommended)
 ```bash
-# Option 1: Start both servers manually
+# Double-click this file:
+start-infinity-workspace.bat
+```
+
+#### Option 2: Manual Start
+```bash
 # Terminal 1 - Backend
 cd backend
 npm start
@@ -86,13 +93,21 @@ npm start
 # Terminal 2 - Frontend
 cd ..
 npm run dev
+```
 
-# Option 2: Start both servers simultaneously
+#### Option 3: Simultaneous Start
+```bash
 npm run start:full
 ```
 
 ### 🎉 That's It!
 No environment setup needed! The application uses a shared development database that's already configured.
+
+### 🔍 If You See "Network Error"
+1. **Wait 10-15 seconds** for servers to fully start
+2. **Check health**: Double-click `check-infinity-workspace.bat`
+3. **Refresh browser** - the frontend might be on a different port
+4. **Restart if needed**: `stop-infinity-workspace.bat` then `start-infinity-workspace.bat`
 
 ## 🌐 Access URLs
 
