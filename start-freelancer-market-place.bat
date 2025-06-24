@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 Starting Freelancer-market-place System...
+echo 🚀 Starting Infinity Workspace System...
 echo.
 
 REM Check if Node.js is installed
@@ -39,7 +39,7 @@ echo ⏳ Waiting for frontend to initialize...
 timeout /t 8 /nobreak >nul
 
 echo.
-echo 🎉 Freelancer-market-place is starting up!
+echo 🎉 Infinity Workspace is starting up!
 echo.
 echo 📋 System URLs:
 echo   Frontend: http://localhost:5173/
@@ -56,7 +56,7 @@ REM Open the application in browser
 start http://localhost:5173/
 
 echo.
-echo ✅ Freelancer-market-place Started Successfully!
+echo ✅ Infinity Workspace Started Successfully!
 echo.
 echo 💡 Tips:
 echo   - Keep both terminal windows open

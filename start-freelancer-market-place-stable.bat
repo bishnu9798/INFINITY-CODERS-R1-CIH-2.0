@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 Starting Freelancer-market-place System (Stable Version)...
+echo 🚀 Starting Infinity Workspace System (Stable Version)...
 echo.
 
 REM Check if Node.js is installed
@@ -39,7 +39,7 @@ echo ⏳ Waiting for frontend to initialize...
 timeout /t 8 /nobreak >nul
 
 echo.
-echo 🎉 Freelancer-market-place is starting up!
+echo 🎉 Infinity Workspace is starting up!
 echo.
 echo 📋 System URLs:
 echo   Frontend: http://localhost:5173/

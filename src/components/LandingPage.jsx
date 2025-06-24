@@ -101,7 +101,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 <span className="text-white font-bold text-sm">FM</span>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                FREELANCER MARKET PLACE
+                INFINITY WORKSPACE
               </span>
             </div>
             <div className="flex items-center space-x-4">
@@ -251,7 +251,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
               </div>
               <h3 className="text-2xl font-bold mb-4">WORK WITH THE BEST—WITHOUT BREKING THE BLANK</h3>
               <p className="text-gray-600">
-                Freelancer market place makes it affordable to up your work and take advantage of low transaction rates.
+                Infinity Workspace makes it affordable to up your work and take advantage of low transaction rates.
               </p>
             </div>
           </div>
@@ -326,7 +326,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">FM</span>
                 </div>
-                <span className="text-xl font-bold">FREELANCER MARKET PLACE</span>
+                <span className="text-xl font-bold">INFINITY WORKSPACE</span>
               </div>
               <p className="text-gray-400">
                 Connecting talent with opportunity through innovation and technology.
@@ -361,7 +361,7 @@ const LandingPage = ({ onGetStarted, onLogin }) => {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 FREELANCER MARKET PLACE. All rights reserved.</p>
+            <p>&copy; 2025 INFINITY WORKSPACE. All rights reserved.</p>
           </div>
         </div>
       </footer>

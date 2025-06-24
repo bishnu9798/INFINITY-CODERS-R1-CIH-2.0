@@ -723,7 +723,7 @@ function App() {
   // Render components remain unchanged — only backend logic was added
   const renderDashboard = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">WELCOME TO FREELANCER MARKET PLACE</h2>
+      <h2 className="text-2xl font-bold mb-6">WELCOME TO INFINITY WORKSPACE</h2>
       <div className="mb-8">
         <h3 className="text-xl font-semibold mb-4">FEATURED SERVICES</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2065,7 +2065,7 @@ function App() {
             {/* Logo and Brand */}
             <div className="flex items-center">
               <h1 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mr-8`}>
-                FREELANCER MARKET PLACE
+                INFINITY WORKSPACE
               </h1>
 
               {/* Dark Mode Toggle */}

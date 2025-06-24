@@ -40,7 +40,7 @@ echo ⏳ Waiting for frontend to initialize...
 timeout /t 8 /nobreak >nul
 
 echo.
-echo 🎉 Freelancer-market-place with MongoDB is starting up!
+echo 🎉 Infinity Workspace with MongoDB is starting up!
 echo.
 echo 📋 System URLs:
 echo   Frontend: http://localhost:5173/
@@ -64,7 +64,7 @@ REM Open the application in browser
 start http://localhost:5173/
 
 echo.
-echo ✅ Freelancer-market-place with MongoDB Started Successfully!
+echo ✅ Infinity Workspace with MongoDB Started Successfully!
 echo.
 echo 💡 Tips:
 echo   - Keep both terminal windows open
