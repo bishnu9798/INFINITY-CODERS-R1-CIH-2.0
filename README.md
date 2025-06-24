@@ -57,8 +57,7 @@ A modern full-stack freelancer marketplace application built with React, Node.js
 ### Prerequisites
 - **Node.js**: v16 or higher
 - **NPM**: v8 or higher
-- **MongoDB Atlas Account**: Free tier available at [mongodb.com](https://cloud.mongodb.com/)
-- **Internet Connection**: Required for MongoDB Atlas
+- **Internet Connection**: Required for shared MongoDB Atlas database
 
 ### Step 1: Clone Repository
 ```bash
@@ -66,16 +65,7 @@ git clone https://github.com/bishnu9798/INFINITY-CODERS-R1-CIH-2.0.git
 cd INFINITY-CODERS-R1-CIH-2.0
 ```
 
-### Step 2: Setup Environment
-```bash
-# Copy environment template
-cp backend/.env.example backend/.env
-
-# Edit backend/.env with your MongoDB Atlas credentials
-# Get your connection string from https://cloud.mongodb.com/
-```
-
-### Step 3: Install Dependencies
+### Step 2: Install Dependencies
 ```bash
 # Install backend dependencies
 cd backend
@@ -86,7 +76,7 @@ cd ..
 npm install
 ```
 
-### Step 4: Start Application
+### Step 3: Start Application
 ```bash
 # Option 1: Start both servers manually
 # Terminal 1 - Backend
@@ -101,6 +91,9 @@ npm run dev
 npm run start:full
 ```
 
+### 🎉 That's It!
+No environment setup needed! The application uses a shared development database that's already configured.
+
 ## 🌐 Access URLs
 
 - **Frontend**: http://localhost:5173/
@@ -110,25 +103,36 @@ npm run start:full
 
 ## 🔑 Getting Started
 
-### Create Your First Accounts
+### 🌐 Shared Development Environment
+This project uses a **shared MongoDB Atlas database** for collaborative development. All users who clone this repository will:
+- ✅ Connect to the same database automatically
+- ✅ See real-time data from all developers
+- ✅ Share services, applications, and user accounts
+- ✅ Experience true collaborative development
+
+### Create Your Accounts
 1. **Register as Freelancer**:
    - Go to http://localhost:5173/
    - Click "Register" and select "Recruiter" (Service Provider)
    - Fill in your details and company information
+   - **Note**: You'll see services from other developers too!
 
 2. **Register as Client**:
    - Click "Register" and select "Job Seeker" (Client)
    - Fill in your personal information
+   - **Note**: You can apply to services posted by any developer
 
 3. **Post Your First Service**:
    - Login as freelancer
    - Go to "Post New Service" tab
    - Fill in service details with contact information
+   - **Note**: Your service will be visible to all other developers
 
 4. **Apply for Services**:
    - Login as client
-   - Browse available services
+   - Browse available services (from all developers)
    - Click "Apply Now" and fill the application form
+   - **Note**: Applications are shared across the development team
 
 ## 🛠️ Management Scripts
 
