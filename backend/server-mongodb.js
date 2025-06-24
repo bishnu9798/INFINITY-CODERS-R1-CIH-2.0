@@ -14,7 +14,7 @@ console.log('📍 Port:', PORT);
 
 // Basic middleware setup
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'http://127.0.0.1:5175'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -51,16 +51,33 @@ const startServer = async () => {
     // Load routes after MongoDB connection
     console.log('🔄 Loading routes...');
     const authRoutes = require('./routes/auth.js');
-    const jobRoutes = require('./routes/jobs.js');
+    const servicesRoutes = require('./routes/services.js');
     const applicationRoutes = require('./routes/applications.js');
     const userRoutes = require('./routes/users.js');
 
     // Setup routes
     app.use('/api/auth', authRoutes);
-    app.use('/api/jobs', jobRoutes);
+    app.use('/api/services', servicesRoutes);
     app.use('/api/applications', applicationRoutes);
     app.use('/api/users', userRoutes);
     console.log('✅ Routes loaded successfully');
+
+    // Initialize real-time services
+    console.log('🔄 Initializing real-time services...');
+    const realTimeService = require('./services/realTimeService.js');
+    await realTimeService.initializeChangeStreams();
+    console.log('✅ Real-time services initialized');
+
+    // Real-time stats endpoint
+    app.get('/api/stats', async (req, res) => {
+      try {
+        const stats = await realTimeService.getRealTimeStats();
+        res.json(stats);
+      } catch (error) {
+        console.error('Error getting stats:', error);
+        res.status(500).json({ error: 'Failed to get statistics' });
+      }
+    });
 
     // Static files for uploaded resumes
     app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

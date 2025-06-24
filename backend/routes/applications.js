@@ -182,7 +182,7 @@ router.get('/service/:serviceId', authenticateToken, async (req, res) => {
 
 // Update application status (recruiter only)
 router.put('/:applicationId/status', authenticateToken, [
-  body('status').isIn(['applied', 'shortlisted', 'rejected', 'hired'])
+  body('status').isIn(['applied', 'accepted', 'rejected'])
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
