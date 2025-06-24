@@ -638,7 +638,7 @@ function App() {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">WELCOME TO FREELANCER MARKET PLACE</h2>
       <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-4">Featured Jobs</h3>
+        <h3 className="text-xl font-semibold mb-4">FEATURED SERVICES</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {displayJobs.slice(0, 6).map(job => (
             <div key={job.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
@@ -913,7 +913,7 @@ function App() {
                     : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                 }`}
               >
-                Saved ({savedJobs.length})
+                SAVED ({savedJobs.length})
               </button>
             )}
           </div>
@@ -1741,7 +1741,7 @@ function App() {
                       name="userType"
                       value={formData.userType}
                       onChange={handleInputChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
                       <option value="jobseeker">Client</option>
                       <option value="recruiter">Freelancer</option>
@@ -1858,7 +1858,7 @@ function App() {
                               : `border-transparent ${darkMode ? 'text-gray-300 hover:text-white hover:border-gray-600' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                           } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
                         >
-                          Saved ({savedJobs.length})
+                          SAVED ({savedJobs.length})
                         </button>
                         <button
                           onClick={() => setActiveTab('applications')}
