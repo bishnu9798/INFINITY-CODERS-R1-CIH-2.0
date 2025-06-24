@@ -1,15 +1,15 @@
 # INFINITY-CODERS-R1-CIH-2.0
 ## CENTRAL INDIA HACKATHON 2.0
 
-# 🚀 Freelancer-market-place Application
+# 🚀 Freelancer Marketplace Application
 
-A full-stack freelancer marketplace application built with React, Node.js, Express, and MongoDB.
+A modern full-stack freelancer marketplace application built with React, Node.js, Express, and MongoDB Atlas.
 
 ## 🌟 Features
 
 ### 🎯 Landing Page Experience
 - **Modern Design**: Beautiful, responsive landing page with gradient animations
-- **Interactive Demo**: Live preview of job seeker and recruiter workflows
+- **Interactive Demo**: Live preview of client and freelancer workflows
 - **Social Proof**: Company logos, user testimonials, and live activity feed
 - **Animated Elements**: Counters, typing animations, and smooth transitions
 - **Pricing Information**: Transparent pricing tiers for all user types
@@ -17,69 +17,87 @@ A full-stack freelancer marketplace application built with React, Node.js, Expre
 - **FAQ Section**: Comprehensive answers to common questions
 - **Mobile Optimized**: Perfect experience across all devices
 
-### 👨‍💻 For Job Seekers
+### 👨‍💻 For Clients (Job Seekers)
 - **User Authentication**: Secure login/register with JWT tokens
 - **Profile Management**: Create comprehensive professional profiles
-- **Job Search & Filtering**: Advanced search with multiple criteria
-- **Smart Matching**: AI-powered job recommendations based on skills
-- **Application System**: Apply for jobs with resume upload
+- **Service Search & Filtering**: Advanced search with multiple criteria
+- **Smart Matching**: Recommendations based on skills and requirements
+- **Application System**: Apply for services with personal information form (no resume required)
 - **Application Tracking**: Monitor status and history of applications
 - **Real-time Updates**: Live notifications and data synchronization
 
-### 👔 For Recruiters
-- **Company Registration**: Create detailed company profiles
-- **Job Management**: Post, edit, delete, and manage job listings
-- **Candidate Management**: View and manage job applications
-- **Application Review**: Review candidate profiles and resumes
-- **Hiring Workflow**: Streamlined hiring process management
-- **Analytics Dashboard**: Track hiring metrics and performance
-- **Team Collaboration**: Multi-user company accounts
+### 👔 For Freelancers (Service Providers)
+- **Professional Registration**: Create detailed freelancer profiles
+- **Service Management**: Post, edit, delete, and manage service listings
+- **Client Management**: View and manage service applications
+- **Application Review**: Review client information and requirements
+- **Business Workflow**: Streamlined client acquisition process
+- **Analytics Dashboard**: Track service metrics and performance
+- **Portfolio Showcase**: Display skills, experience, and contact information
 
 ### 🔧 Technical Features
 - **Responsive Design**: Works perfectly on desktop and mobile devices
 - **Real-time Updates**: Live data synchronization with MongoDB Atlas
 - **Secure Authentication**: JWT-based authentication system
-- **File Upload**: Resume upload and storage functionality
+- **Form-based Applications**: Streamlined application process without file uploads
 - **RESTful API**: Well-structured backend API endpoints
+- **Database Migration**: Clean transition from Jobs to Services model
 
 ## 🔧 Tech Stack
 
 - **Frontend**: React, Vite, Tailwind CSS
 - **Backend**: Node.js, Express.js
-- **Database**: MongoDB Atlas
+- **Database**: MongoDB Atlas with Change Streams
 - **Authentication**: JWT tokens
-- **File Upload**: Multer for resume handling
+- **Real-time**: MongoDB Change Streams for live updates
+- **Testing**: Comprehensive test suites for all functionality
 
 ## 🚀 Quick Start
 
-### Option 1: MongoDB Version (Recommended)
+### Prerequisites
+- **Node.js**: v16 or higher
+- **NPM**: v8 or higher
+- **MongoDB Atlas Account**: Free tier available at [mongodb.com](https://cloud.mongodb.com/)
+- **Internet Connection**: Required for MongoDB Atlas
+
+### Step 1: Clone Repository
 ```bash
-# Double-click this file for full database integration:
-start-freelancer-market-place-mongodb.bat
+git clone https://github.com/bishnu9798/INFINITY-CODERS-R1-CIH-2.0.git
+cd INFINITY-CODERS-R1-CIH-2.0
 ```
 
-### Option 2: Stable Test Version
+### Step 2: Setup Environment
 ```bash
-# Double-click this file for stable test version:
-start-freelancer-market-place-stable.bat
+# Copy environment template
+cp backend/.env.example backend/.env
+
+# Edit backend/.env with your MongoDB Atlas credentials
+# Get your connection string from https://cloud.mongodb.com/
 ```
 
-### Option 3: Manual Start
+### Step 3: Install Dependencies
 ```bash
-# Start Backend (Terminal 1)
+# Install backend dependencies
 cd backend
-node server-mongodb.js
-
-# Start Frontend (Terminal 2)
-npx vite
-```
-
-### Option 3: Using NPM Scripts
-```bash
-# Install concurrently first
 npm install
 
-# Start both servers simultaneously
+# Install frontend dependencies
+cd ..
+npm install
+```
+
+### Step 4: Start Application
+```bash
+# Option 1: Start both servers manually
+# Terminal 1 - Backend
+cd backend
+npm start
+
+# Terminal 2 - Frontend
+cd ..
+npm run dev
+
+# Option 2: Start both servers simultaneously
 npm run start:full
 ```
 
@@ -88,17 +106,29 @@ npm run start:full
 - **Frontend**: http://localhost:5173/
 - **Backend API**: http://localhost:3002/api
 - **Health Check**: http://localhost:3002/api/health
+- **Database Status**: http://localhost:3002/api/stats
 
-## 🔑 Test Accounts
+## 🔑 Getting Started
 
-### Recruiter Account
-- **Email**: manishmodi0408@gmail.com
-- **Password**: 987654
-- **Company**: The Tech World
+### Create Your First Accounts
+1. **Register as Freelancer**:
+   - Go to http://localhost:5173/
+   - Click "Register" and select "Recruiter" (Service Provider)
+   - Fill in your details and company information
 
-### Job Seeker Account
-- **Email**: manish1@gmail.com
-- **Password**: 123456
+2. **Register as Client**:
+   - Click "Register" and select "Job Seeker" (Client)
+   - Fill in your personal information
+
+3. **Post Your First Service**:
+   - Login as freelancer
+   - Go to "Post New Service" tab
+   - Fill in service details with contact information
+
+4. **Apply for Services**:
+   - Login as client
+   - Browse available services
+   - Click "Apply Now" and fill the application form
 
 ## 🛠️ Management Scripts
 
