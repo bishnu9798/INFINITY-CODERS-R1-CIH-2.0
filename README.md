@@ -81,7 +81,7 @@ npm install
 #### Option 1: One-Click Start (Recommended)
 ```bash
 # Double-click this file:
-start-infinity-workspace.bat
+scripts/start-infinity-workspace.bat
 ```
 
 #### Option 2: Manual Start
@@ -105,9 +105,9 @@ No environment setup needed! The application uses a shared development database 
 
 ### 🔍 If You See "Network Error"
 1. **Wait 10-15 seconds** for servers to fully start
-2. **Check health**: Double-click `check-infinity-workspace.bat`
+2. **Check health**: Double-click `scripts/check-infinity-workspace.bat`
 3. **Refresh browser** - the frontend might be on a different port
-4. **Restart if needed**: `stop-infinity-workspace.bat` then `start-infinity-workspace.bat`
+4. **Restart if needed**: `scripts/stop-infinity-workspace.bat` then `scripts/start-infinity-workspace.bat`
 
 ## 🌐 Access URLs
 
@@ -153,21 +153,21 @@ This project uses a **shared MongoDB Atlas database** for collaborative developm
 
 ### Start System
 ```bash
-start-freelancer-market-place.bat    # Windows batch file
+scripts/start-freelancer-market-place.bat    # Windows batch file
 # OR
 npm run start:full      # NPM script
 ```
 
 ### Stop System
 ```bash
-stop-freelancer-market-place.bat     # Windows batch file
+scripts/stop-freelancer-market-place.bat     # Windows batch file
 # OR
 npm run stop           # NPM script
 ```
 
 ### Check System Health
 ```bash
-check-system.bat       # Windows batch file
+scripts/check-system.bat       # Windows batch file
 # OR
 npm run check         # NPM script
 ```
@@ -189,7 +189,7 @@ npm run check         # NPM script
    - Check if ports 3002 and 5173 are available
 
 2. **"Port already in use"**
-   - Run `stop-freelancer-market-place.bat` first
+   - Run `scripts/stop-freelancer-market-place.bat` first
    - Wait 5 seconds, then start again
 
 3. **"Cannot connect to MongoDB"**
@@ -205,7 +205,7 @@ npm run check         # NPM script
 
 1. **Check System Status**:
    ```bash
-   check-system.bat
+   scripts/check-system.bat
    ```
 
 2. **View Logs**:
@@ -215,8 +215,8 @@ npm run check         # NPM script
 
 3. **Restart Everything**:
    ```bash
-   stop-freelancer-market-place.bat
-   start-freelancer-market-place.bat
+   scripts/stop-freelancer-market-place.bat
+   scripts/start-freelancer-market-place.bat
    ```
 
 ## 📁 Project Structure
@@ -245,9 +245,28 @@ freelancer-market-place/
 │   │   └── landing-page.css         # Custom animations
 │   ├── services/          # API services
 │   └── App.jsx           # Main app component
-├── start-freelancer-market-place.bat   # Start script
-├── stop-freelancer-market-place.bat    # Stop script
-├── check-system.bat       # Health check
+├── scripts/               # Utility scripts
+│   ├── start-freelancer-market-place.bat   # Start script
+│   ├── stop-freelancer-market-place.bat    # Stop script
+│   ├── check-system.bat       # Health check
+│   └── README.md             # Scripts documentation
+├── tests/                 # Test files
+│   ├── test-*.html        # HTML test interfaces
+│   ├── test-*.js          # JavaScript test files
+│   └── README.md          # Tests documentation
+├── debug/                 # Debug utilities
+│   ├── debug-*.html       # Debug interfaces
+│   ├── debug-*.cjs        # Debug scripts
+│   └── README.md          # Debug documentation  
+├── database-utils/        # Database utilities
+│   ├── create-test-users.cjs      # Create test users
+│   ├── reset-database.js          # Reset database
+│   ├── final-status-check.js      # Status check
+│   ├── sample-resume.txt          # Sample data
+│   └── README.md                  # Database utils documentation
+├── docs/                  # Documentation
+│   └── requirements.md    # Project requirements
+├── public/               # Public assets
 └── README.md             # This file
 ```
 
@@ -323,9 +342,9 @@ If everything is working correctly, you should see:
 ## 📞 Support
 
 If you encounter any issues:
-1. Run the health check: `check-system.bat`
+1. Run the health check: `scripts/check-system.bat`
 2. Check the troubleshooting section above
-3. Restart the system: `stop-freelancer-market-place.bat` then `start-freelancer-market-place.bat`
+3. Restart the system: `scripts/stop-freelancer-market-place.bat` then `scripts/start-freelancer-market-place.bat`
 
 ---
 
